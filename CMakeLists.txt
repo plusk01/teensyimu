@@ -2,13 +2,19 @@ cmake_minimum_required(VERSION 3.10)
 project(teensyimu)
 
 set(CMAKE_CXX_STANDARD 14)
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
     # Options: Debug, Release, MinSizeRel, RelWithDebInfo
     message(STATUS "No build type selected, default to Release")
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+###############################################################################
+# Options
+###############################################################################
+
+option(BUILD_BINDINGS_PYTHON "Build Python bindings" ON)
 
 ###############################################################################
 # async_comm
@@ -19,6 +25,20 @@ configure_file(${CMAKE_MODULE_PATH}/async_comm.cmake.in ${ASYNC_COMM_DIR}/CMakeL
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" . WORKING_DIRECTORY ${ASYNC_COMM_DIR})
 execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY ${ASYNC_COMM_DIR})
 add_subdirectory(${ASYNC_COMM_DIR}/src)
+
+###############################################################################
+# Pybind11
+###############################################################################
+
+if(BUILD_BINDINGS_PYTHON)
+  set(PYBIND11_DIR "${CMAKE_CURRENT_BINARY_DIR}/pybind11-download" CACHE INTERNAL "pybind11 build dir" FORCE)
+  configure_file(${CMAKE_MODULE_PATH}/pybind11.cmake.in ${PYBIND11_DIR}/CMakeLists.txt IMMEDIATE @ONLY)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" . WORKING_DIRECTORY ${PYBIND11_DIR})
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY ${PYBIND11_DIR})
+  add_subdirectory(${PYBIND11_DIR}/src)
+
+  add_subdirectory(bindings/python)
+endif()
 
 ###############################################################################
 # Targets

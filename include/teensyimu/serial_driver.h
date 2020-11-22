@@ -22,7 +22,7 @@ namespace teensyimu {
   class SerialDriver
   {
   public:
-    SerialDriver(std::string port = "/dev/ttyACM0", uint32_t baud = 115200);
+    SerialDriver(const std::string& port = "/dev/ttyACM0", uint32_t baud = 115200);
     ~SerialDriver();
 
     void registerCallbackIMU(CallbackIMU cb);

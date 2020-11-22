@@ -15,7 +15,7 @@
 namespace acl {
 namespace teensyimu {
 
-SerialDriver::SerialDriver(std::string port, uint32_t baud)
+SerialDriver::SerialDriver(const std::string& port, uint32_t baud)
 {
   using namespace std::placeholders;
 
