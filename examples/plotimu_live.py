@@ -49,6 +49,7 @@ def main():
         sys.exit()
 
     driver = ACLSerialDriver(port)
+    time.sleep(0.1)
     driver.registerCallbackIMU(imu_cb)
 
     # https://pyqtgraph.readthedocs.io/en/latest/plotting.html#examples
