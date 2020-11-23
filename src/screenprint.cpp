@@ -49,7 +49,11 @@ void callback(const acl_serial_imu_msg_t& msg)
 
 int main(int argc, char const *argv[])
 {
-  acl::teensyimu::SerialDriver driver;
+  std::string port = "/dev/ttyACM0";
+
+  if (argc == 2) port = std::string(argv[1]);
+
+  acl::teensyimu::SerialDriver driver(port);
   driver.registerCallbackIMU(callback);
 
   // spin forever and let CPU do other things (no busy waiting)
