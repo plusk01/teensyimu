@@ -9,22 +9,22 @@ At = []
 Ax = []
 Ay = []
 Az = []
-last_t_ms = 0
+last_t_us = 0
 
 # how many seconds of samples to keep in the plotting window?
 SAMPLE_WINDOW_SEC = 5
 
 def imu_cb(msg):
-    global last_t_ms
-    dt = (msg.t_ms - last_t_ms) * 1e-3 # ms to s
-    last_t_ms = msg.t_ms
+    global last_t_us
+    dt = (msg.t_us - last_t_us) * 1e-6 # us to s
+    last_t_us = msg.t_us
     hz = 1./dt
-    print('Got IMU at {} ms ({:.0f} Hz): {:.2f}, {:.2f}, {:.2f}, \t {:.2f}, {:.2f}, {:.2f}'
-            .format(msg.t_ms, hz,
+    print('Got IMU at {} us ({:.0f} Hz): {:.2f}, {:.2f}, {:.2f}, \t {:.2f}, {:.2f}, {:.2f}'
+            .format(msg.t_us, hz,
                     msg.accel_x, msg.accel_y, msg.accel_z,
                     msg.gyro_x, msg.gyro_y, msg.gyro_z))
 
-    At.append(msg.t_ms)
+    At.append(msg.t_us)
     Ax.append(msg.accel_x)
     Ay.append(msg.accel_y)
     Az.append(msg.accel_z)

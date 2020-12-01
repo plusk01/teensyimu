@@ -3,10 +3,8 @@
 #include "acl_serial.h"
 
 
-#define SPI_FREQ 1000000// You can override the default SPI frequency
+#define SPI_FREQ 4000000// You can override the default SPI frequency
 #define CS_PIN 10        // Which pin you connect CS to. Used only when "USE_SPI" is defined
-
-
 
 ICM_20948_SPI myICM;  // If using SPI create an ICM_20948_SPI object
 
@@ -14,8 +12,8 @@ ICM_20948_SPI myICM;  // If using SPI create an ICM_20948_SPI object
 // configuration options
 //=============================================================================
 
-// sensor polling interval (ms)
-static constexpr uint32_t SENSOR_POLL_INTERVAL_MS = 2;
+// sensor polling interval (micros)
+static constexpr uint32_t SENSOR_POLL_INTERVAL_US = 500;
 
 
 //=============================================================================
@@ -26,8 +24,10 @@ static constexpr uint32_t SENSOR_POLL_INTERVAL_MS = 2;
 uint8_t out_buf[ACL_SERIAL_MAX_MESSAGE_LEN];
 
 // timing
-uint32_t sensor_poll_previous_ms = 0;
+uint32_t sensor_poll_previous_us = 0;
 
+// computed constants
+static constexpr double DEG2RAD = M_PI/180.;
 
 //=============================================================================
 // initialize
@@ -87,7 +87,7 @@ void setup() {
                           // gpm8
                           // gpm16
                          
-  myFSS.g = dps250;       // (ICM_20948_GYRO_CONFIG_1_FS_SEL_e)
+  myFSS.g = dps2000;      // (ICM_20948_GYRO_CONFIG_1_FS_SEL_e)
                           // dps250
                           // dps500
                           // dps1000
@@ -143,25 +143,25 @@ void setup() {
 //=============================================================================
 
 void loop() {
-  uint32_t current_time_ms = millis();
+  uint32_t current_time_us = micros();
  
-  if (current_time_ms >= sensor_poll_previous_ms + SENSOR_POLL_INTERVAL_MS) {
+  if (current_time_us >= sensor_poll_previous_us + SENSOR_POLL_INTERVAL_US) {
 
     myICM.getAGMT();                // The values are only updated when you call 'getAGMT'
 
     // pack and ship IMU data
     acl_serial_imu_msg_t imu_msg;
-    imu_msg.t_ms = current_time_ms;
+    imu_msg.t_us = current_time_us;
     imu_msg.accel_x = myICM.accX()*1e-3;
     imu_msg.accel_y = myICM.accY()*1e-3;
     imu_msg.accel_z = myICM.accZ()*1e-3;
-    imu_msg.gyro_x = myICM.gyrX();
-    imu_msg.gyro_y = myICM.gyrY();
-    imu_msg.gyro_z = myICM.gyrZ(); 
+    imu_msg.gyro_x = myICM.gyrX() * DEG2RAD;
+    imu_msg.gyro_y = myICM.gyrY() * DEG2RAD;
+    imu_msg.gyro_z = myICM.gyrZ() * DEG2RAD;
    
     const size_t len = acl_serial_imu_msg_send_to_buffer(out_buf, &imu_msg);
     Serial.write(out_buf, len);
 
-    sensor_poll_previous_ms = current_time_ms;
+    sensor_poll_previous_us = current_time_us;
   }
 }

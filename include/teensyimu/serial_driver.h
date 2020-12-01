@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "protocol/acl_serial.h"
@@ -26,10 +27,12 @@ namespace teensyimu {
     ~SerialDriver();
 
     void registerCallbackIMU(CallbackIMU cb);
+    void unregisterCallback();
     
   private:
     std::unique_ptr<async_comm::Serial> serial_;
     CallbackIMU cb_imu_;
+    std::mutex mtx_; ///< synchronize callback resource reg/unreg
 
     void callback(const uint8_t * data, size_t len);
 

@@ -21,7 +21,7 @@ PYBIND11_MODULE(acl_serial_driver, m)
   m.attr("__version__") = "0.1";
 
   py::class_<acl_serial_imu_msg_t>(m, "ACLSerialIMUMsg")
-    .def_readwrite("t_ms", &acl_serial_imu_msg_t::t_ms)
+    .def_readwrite("t_us", &acl_serial_imu_msg_t::t_us)
     .def_readwrite("accel_x", &acl_serial_imu_msg_t::accel_x)
     .def_readwrite("accel_y", &acl_serial_imu_msg_t::accel_y)
     .def_readwrite("accel_z", &acl_serial_imu_msg_t::accel_z)
@@ -32,5 +32,6 @@ PYBIND11_MODULE(acl_serial_driver, m)
   py::class_<acl::teensyimu::SerialDriver>(m, "ACLSerialDriver")
     .def(py::init<const std::string&, uint32_t>(),
           py::arg("port")="/dev/ttyACM0", py::arg("baud")=115200)
-    .def("registerCallbackIMU", &acl::teensyimu::SerialDriver::registerCallbackIMU);
+    .def("registerCallbackIMU", &acl::teensyimu::SerialDriver::registerCallbackIMU)
+    .def("unregisterCallback", &acl::teensyimu::SerialDriver::unregisterCallback, py::call_guard<py::gil_scoped_release>());
 }

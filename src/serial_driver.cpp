@@ -39,8 +39,18 @@ SerialDriver::~SerialDriver()
 
 void SerialDriver::registerCallbackIMU(CallbackIMU cb)
 {
+  std::lock_guard<std::mutex> lock(mtx_);
   cb_imu_ = cb;
 }
+
+// ----------------------------------------------------------------------------
+
+void SerialDriver::unregisterCallback()
+{
+  std::lock_guard<std::mutex> lock(mtx_);
+  cb_imu_ = nullptr;
+}
+
 
 // ----------------------------------------------------------------------------
 // Private Methods
@@ -68,6 +78,8 @@ void SerialDriver::handleIMUMsg(const acl_serial_message_t& msg)
 {
   acl_serial_imu_msg_t imu;
   acl_serial_imu_msg_unpack(&imu, &msg);
+
+  std::lock_guard<std::mutex> lock(mtx_);
   if (cb_imu_) cb_imu_(imu);
 }
 

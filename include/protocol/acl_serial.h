@@ -27,7 +27,7 @@ typedef enum {
 //=============================================================================
 
 typedef struct {
-  uint32_t t_ms;
+  uint32_t t_us;
   float accel_x;
   float accel_y;
   float accel_z;
@@ -117,7 +117,7 @@ inline void acl_serial_imu_msg_pack(acl_serial_message_t *dst, const acl_serial_
 {
   dst->type = ACL_SERIAL_MSG_IMU;
   size_t offset = 0;
-  memcpy(dst->payload + offset, &src->t_ms, sizeof(src->t_ms)); offset += sizeof(src->t_ms);
+  memcpy(dst->payload + offset, &src->t_us, sizeof(src->t_us)); offset += sizeof(src->t_us);
   memcpy(dst->payload + offset, &src->accel_x, sizeof(src->accel_x)); offset += sizeof(src->accel_x);
   memcpy(dst->payload + offset, &src->accel_y, sizeof(src->accel_y)); offset += sizeof(src->accel_y);
   memcpy(dst->payload + offset, &src->accel_z, sizeof(src->accel_z)); offset += sizeof(src->accel_z);
@@ -130,7 +130,7 @@ inline void acl_serial_imu_msg_pack(acl_serial_message_t *dst, const acl_serial_
 inline void acl_serial_imu_msg_unpack(acl_serial_imu_msg_t *dst, const acl_serial_message_t *src)
 {
   size_t offset = 0;
-  memcpy(&dst->t_ms, src->payload + offset, sizeof(dst->t_ms)); offset += sizeof(dst->t_ms);
+  memcpy(&dst->t_us, src->payload + offset, sizeof(dst->t_us)); offset += sizeof(dst->t_us);
   memcpy(&dst->accel_x, src->payload + offset, sizeof(dst->accel_x)); offset += sizeof(dst->accel_x);
   memcpy(&dst->accel_y, src->payload + offset, sizeof(dst->accel_y)); offset += sizeof(dst->accel_y);
   memcpy(&dst->accel_z, src->payload + offset, sizeof(dst->accel_z)); offset += sizeof(dst->accel_z);

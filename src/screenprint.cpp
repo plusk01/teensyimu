@@ -13,7 +13,7 @@
 #include <teensyimu/serial_driver.h>
 
 /// |brief Global variables
-double last_t_ms = 0;
+uint32_t last_t_us = 0;
 
 /**
  * @brief      Handles IMU messages when received via serial
@@ -22,9 +22,9 @@ double last_t_ms = 0;
  */
 void callback(const acl_serial_imu_msg_t& msg)
 {
-  const double dt = (msg.t_ms - last_t_ms) * 1e-3; // ms to s
+  const double dt = (msg.t_us - last_t_us) * 1e-6; // us to s
   const double hz = 1. / dt;
-  last_t_ms = msg.t_ms;
+  last_t_us = msg.t_us;
 
   static constexpr int w = 5;
   std::stringstream ss;
@@ -43,7 +43,7 @@ void callback(const acl_serial_imu_msg_t& msg)
      << std::setw(w) << std::setfill(' ')
      << msg.gyro_z;
 
-  std::cout << "Got IMU at " << msg.t_ms << " ms (" << hz << " Hz): "
+  std::cout << "Got IMU at " << msg.t_us << " us (" << hz << " Hz): "
             << ss.str() << std::endl;
 }
 
