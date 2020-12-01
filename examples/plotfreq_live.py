@@ -149,6 +149,9 @@ class IMUAnalyzer:
         if len(buf) < self.FFT_SIZE:
             return [], []
 
+        # get rid of DC
+        buf = np.array(buf) - np.mean(np.array(buf))
+
         # window the data for a better behaved short-time FT style DFT
         data = np.array(buf) * self.window
 
