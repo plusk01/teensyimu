@@ -65,5 +65,8 @@ def main():
     timer.start(50) # ms
     QtGui.QApplication.instance().exec_()
 
+    # clean up to prevent error or resource deadlock
+    driver.unregisterCallback()
+
 if __name__ == '__main__':
     main()
