@@ -16,6 +16,7 @@ ICM_20948_SPI myICM;     // SPI object to talk to ICM20948 IMU
 uint32_t SENSOR_POLL_INTERVAL_US = 1000; // default, can be changed online
 // note that ICM20948 has max Fs,accel = 4500 Hz; Fs,gyro = 9000 Hz
 
+static constexpr float g = 9.80665f;
 
 //=============================================================================
 // global variables
@@ -155,9 +156,9 @@ void loop()
     // pack and ship IMU data
     acl_serial_imu_msg_t imu_msg;
     imu_msg.t_us = current_time_us;
-    imu_msg.accel_x = myICM.accX()*1e-3;
-    imu_msg.accel_y = myICM.accY()*1e-3;
-    imu_msg.accel_z = myICM.accZ()*1e-3;
+    imu_msg.accel_x = myICM.accX()*1e-3 * g;
+    imu_msg.accel_y = myICM.accY()*1e-3 * g;
+    imu_msg.accel_z = myICM.accZ()*1e-3 * g;
     imu_msg.gyro_x = myICM.gyrX() * DEG2RAD;
     imu_msg.gyro_y = myICM.gyrY() * DEG2RAD;
     imu_msg.gyro_z = myICM.gyrZ() * DEG2RAD;
