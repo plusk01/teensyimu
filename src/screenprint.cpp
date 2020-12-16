@@ -47,6 +47,11 @@ void callback(const acl_serial_imu_msg_t& msg)
             << ss.str() << std::endl;
 }
 
+void rateCb(const acl_serial_rate_msg_t& msg)
+{
+  std::cout << "Sample Rate: " << msg.frequency << " Hz" << std::endl;
+}
+
 int main(int argc, char const *argv[])
 {
   std::string port = "/dev/ttyACM0";
@@ -55,6 +60,7 @@ int main(int argc, char const *argv[])
 
   acl::teensyimu::SerialDriver driver(port);
   driver.registerCallbackIMU(callback);
+  driver.registerCallbackRate(rateCb);
 
   // spin forever and let CPU do other things (no busy waiting)
   std::promise<void>().get_future().wait();

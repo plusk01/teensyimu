@@ -36,6 +36,19 @@ SerialDriver::~SerialDriver()
 }
 
 // ----------------------------------------------------------------------------
+// Send message methods
+// ----------------------------------------------------------------------------
+
+void SerialDriver::sendRate(const acl_serial_rate_msg_t& msg)
+{
+  uint8_t buf[ACL_SERIAL_MAX_MESSAGE_LEN];
+  const size_t len = acl_serial_rate_msg_send_to_buffer(buf, &msg);
+  serial_->send_bytes(buf, len);
+}
+
+// ----------------------------------------------------------------------------
+// Callback stuff
+// ----------------------------------------------------------------------------
 
 void SerialDriver::registerCallbackIMU(CallbackIMU cb)
 {
@@ -45,10 +58,19 @@ void SerialDriver::registerCallbackIMU(CallbackIMU cb)
 
 // ----------------------------------------------------------------------------
 
-void SerialDriver::unregisterCallback()
+void SerialDriver::registerCallbackRate(CallbackRate cb)
+{
+  std::lock_guard<std::mutex> lock(mtx_);
+  cb_rate_ = cb;
+}
+
+// ----------------------------------------------------------------------------
+
+void SerialDriver::unregisterCallbacks()
 {
   std::lock_guard<std::mutex> lock(mtx_);
   cb_imu_ = nullptr;
+  cb_rate_ = nullptr;
 }
 
 
@@ -66,6 +88,9 @@ void SerialDriver::callback(const uint8_t * data, size_t len)
         case ACL_SERIAL_MSG_IMU:
           handleIMUMsg(msg);
           break;
+        case ACL_SERIAL_MSG_RATE:
+          handleRateMsg(msg);
+          break;
       }
 
     }
@@ -81,6 +106,17 @@ void SerialDriver::handleIMUMsg(const acl_serial_message_t& msg)
 
   std::lock_guard<std::mutex> lock(mtx_);
   if (cb_imu_) cb_imu_(imu);
+}
+
+// ----------------------------------------------------------------------------
+
+void SerialDriver::handleRateMsg(const acl_serial_message_t& msg)
+{
+  acl_serial_rate_msg_t rate;
+  acl_serial_rate_msg_unpack(&rate, &msg);
+
+  std::lock_guard<std::mutex> lock(mtx_);
+  if (cb_rate_) cb_rate_(rate);
 }
 
 } // ns teensyimu

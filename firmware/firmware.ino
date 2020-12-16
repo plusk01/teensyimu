@@ -3,17 +3,18 @@
 #include "acl_serial.h"
 
 
-#define SPI_FREQ 4000000// You can override the default SPI frequency
-#define CS_PIN 10        // Which pin you connect CS to. Used only when "USE_SPI" is defined
+#define SPI_FREQ 6000000 // ICM20948 has max 7 MHz SPI, but >6 MHz breaks
+#define CS_PIN 10        // Which pin you connect chip select (CS) to
 
-ICM_20948_SPI myICM;  // If using SPI create an ICM_20948_SPI object
+ICM_20948_SPI myICM;     // SPI object to talk to ICM20948 IMU
 
 //=============================================================================
 // configuration options
 //=============================================================================
 
 // sensor polling interval (micros)
-static constexpr uint32_t SENSOR_POLL_INTERVAL_US = 500;
+uint32_t SENSOR_POLL_INTERVAL_US = 1000; // default, can be changed online
+// note that ICM20948 has max Fs,accel = 4500 Hz; Fs,gyro = 9000 Hz
 
 
 //=============================================================================
@@ -22,6 +23,7 @@ static constexpr uint32_t SENSOR_POLL_INTERVAL_US = 500;
 
 // serial stuff
 uint8_t out_buf[ACL_SERIAL_MAX_MESSAGE_LEN];
+acl_serial_message_t msg_buf;
 
 // timing
 uint32_t sensor_poll_previous_us = 0;
@@ -30,10 +32,27 @@ uint32_t sensor_poll_previous_us = 0;
 static constexpr double DEG2RAD = M_PI/180.;
 
 //=============================================================================
+// Helper functions
+//=============================================================================
+
+void update_sample_rate(uint16_t rate)
+{
+  SENSOR_POLL_INTERVAL_US = static_cast<uint32_t>(1e6 / rate);
+  
+  // pack and ship rate info
+  acl_serial_rate_msg_t rate_msg;
+  rate_msg.frequency = rate;
+ 
+  const size_t len = acl_serial_rate_msg_send_to_buffer(out_buf, &rate_msg);
+  Serial.write(out_buf, len);
+}
+
+//=============================================================================
 // initialize
 //=============================================================================
 
-void setup() {
+void setup()
+{
   // set up serial communication
   // baud doesn't really matter since USB
   // (make sure selected in menu: Tools > USB Type > Serial)
@@ -42,25 +61,16 @@ void setup() {
   SPI.begin();
   bool initialized = false;
   while (!initialized) {
-    
-    myICM.begin(CS_PIN, SPI, SPI_FREQ); // Here we are using the user-defined SPI_FREQ as the clock speed of the SPI bus
-
-//    Serial.print( F("Initialization of the sensor returned: ") );
-//    Serial.println( myICM.statusString() );
+    myICM.begin(CS_PIN, SPI, SPI_FREQ);
     if (myICM.status != ICM_20948_Stat_Ok) {
-//      Serial.println( "Trying again..." );
       delay(500);
-    }else{
+    } else {
       initialized = true;
     }
   }
 
   // Here we are doing a SW reset to make sure the device starts in a known state
   myICM.swReset( );
-  if( myICM.status != ICM_20948_Stat_Ok){
-//    Serial.print(F("Software Reset returned: "));
-//    Serial.println(myICM.statusString());
-  }
   delay(250);
  
   // Now wake the sensor up
@@ -81,7 +91,7 @@ void setup() {
   // Set full scale ranges for both acc and gyr
   ICM_20948_fss_t myFSS;  // This uses a "Full Scale Settings" structure that can contain values for all configurable sensors
  
-  myFSS.a = gpm2;         // (ICM_20948_ACCEL_CONFIG_FS_SEL_e)
+  myFSS.a = gpm16;         // (ICM_20948_ACCEL_CONFIG_FS_SEL_e)
                           // gpm2
                           // gpm4
                           // gpm8
@@ -93,12 +103,7 @@ void setup() {
                           // dps1000
                           // dps2000
                          
-  myICM.setFullScale( (ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myFSS );  
-  if( myICM.status != ICM_20948_Stat_Ok){
-//    SERIAL_PORT.print(F("setFullScale returned: "));
-//    SERIAL_PORT.println(myICM.statusString());
-  }
-
+  myICM.setFullScale( (ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myFSS );
 
   // Set up Digital Low-Pass Filter configuration
   ICM_20948_dlpcfg_t myDLPcfg;            // Similar to FSS, this uses a configuration structure for the desired sensors
@@ -122,27 +127,25 @@ void setup() {
                                           // gyr_d361bw4_n376bw5
                                          
   myICM.setDLPFcfg( (ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myDLPcfg );
-  if( myICM.status != ICM_20948_Stat_Ok){
-//    Serial.print(F("setDLPcfg returned: "));
-//    Serial.println(myICM.statusString());
-  }
 
   // Choose whether or not to use DLPF
   // Here we're also showing another way to access the status values, and that it is OK to supply individual sensor masks to these functions
   ICM_20948_Status_e accDLPEnableStat = myICM.enableDLPF( ICM_20948_Internal_Acc, false );
   ICM_20948_Status_e gyrDLPEnableStat = myICM.enableDLPF( ICM_20948_Internal_Gyr, false );
-//  Serial.print(F("Enable DLPF for Accelerometer returned: ")); SERIAL_PORT.println(myICM.statusString(accDLPEnableStat));
-//  Serial.print(F("Enable DLPF for Gyroscope returned: ")); SERIAL_PORT.println(myICM.statusString(gyrDLPEnableStat));
 
-//  Serial.println();
-//  Serial.println(F("Configuration complete!"));
+  //
+  // Transmit configuration info
+  //
+
+  update_sample_rate(static_cast<uint16_t>(1e6/SENSOR_POLL_INTERVAL_US));
 }
 
 //=============================================================================
 // loop
 //=============================================================================
 
-void loop() {
+void loop()
+{
   uint32_t current_time_us = micros();
  
   if (current_time_us >= sensor_poll_previous_us + SENSOR_POLL_INTERVAL_US) {
@@ -164,4 +167,33 @@ void loop() {
 
     sensor_poll_previous_us = current_time_us;
   }
+}
+
+//=============================================================================
+// handle received serial data
+//=============================================================================
+
+void serialEvent()
+{
+  while (Serial.available()) {
+    uint8_t in_byte = (uint8_t) Serial.read();
+    if (acl_serial_parse_byte(in_byte, &msg_buf)) {
+      switch (msg_buf.type) {
+      case ACL_SERIAL_MSG_RATE:
+        acl_serial_rate_msg_t rate_msg;
+        acl_serial_rate_msg_unpack(&rate_msg, &msg_buf);
+        handle_rate_msg(rate_msg);
+        break;
+      }
+    }
+  }
+}
+
+//=============================================================================
+// handle received messages
+//=============================================================================
+
+void handle_rate_msg(const acl_serial_rate_msg_t& msg)
+{
+  update_sample_rate(msg.frequency);
 }

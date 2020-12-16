@@ -84,7 +84,7 @@ class IMUAnalyzer:
         QtGui.QApplication.instance().exec_()
 
         # clean up to prevent error or resource deadlock
-        self.driver.unregisterCallback()
+        self.driver.unregisterCallbacks()
 
     def _timer_cb(self):
         self.pw.plot(self.t, self.sensx, pen=(1,3), clear=True)

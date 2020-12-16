@@ -19,6 +19,7 @@
 
 typedef enum {
   ACL_SERIAL_MSG_IMU,
+  ACL_SERIAL_MSG_RATE,
   ACL_SERIAL_NUM_MSGS
 } acl_msg_type_t;
 
@@ -36,10 +37,17 @@ typedef struct {
   float gyro_z;
 } acl_serial_imu_msg_t;
 
+typedef struct {
+  uint16_t frequency;
+} acl_serial_rate_msg_t;
+
 // payload lengths
 static constexpr float ACL_SERIAL_PAYLOAD_LEN[] = {
-  sizeof(acl_serial_imu_msg_t)
+  sizeof(acl_serial_imu_msg_t),
+  sizeof(acl_serial_rate_msg_t)
 };
+
+// manually indicate the largest msg payload
 static constexpr size_t ACL_SERIAL_MAX_PAYLOAD_LEN = sizeof(acl_serial_imu_msg_t);
 
 //=============================================================================
@@ -143,6 +151,31 @@ inline size_t acl_serial_imu_msg_send_to_buffer(uint8_t *dst, const acl_serial_i
 {
   acl_serial_message_t msg;
   acl_serial_imu_msg_pack(&msg, src);
+  return acl_serial_send_to_buffer(dst, &msg);
+}
+
+//=============================================================================
+// Rate message
+//=============================================================================
+
+inline void acl_serial_rate_msg_pack(acl_serial_message_t *dst, const acl_serial_rate_msg_t *src)
+{
+  dst->type = ACL_SERIAL_MSG_RATE;
+  size_t offset = 0;
+  memcpy(dst->payload + offset, &src->frequency, sizeof(src->frequency)); offset += sizeof(src->frequency);
+  acl_serial_finalize_message(dst);
+}
+
+inline void acl_serial_rate_msg_unpack(acl_serial_rate_msg_t *dst, const acl_serial_message_t *src)
+{
+  size_t offset = 0;
+  memcpy(&dst->frequency, src->payload + offset, sizeof(dst->frequency)); offset += sizeof(dst->frequency);
+}
+
+inline size_t acl_serial_rate_msg_send_to_buffer(uint8_t *dst, const acl_serial_rate_msg_t *src)
+{
+  acl_serial_message_t msg;
+  acl_serial_rate_msg_pack(&msg, src);
   return acl_serial_send_to_buffer(dst, &msg);
 }
 
