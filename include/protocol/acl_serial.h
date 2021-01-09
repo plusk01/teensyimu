@@ -20,6 +20,7 @@
 typedef enum {
   ACL_SERIAL_MSG_IMU,
   ACL_SERIAL_MSG_RATE,
+  ACL_SERIAL_MSG_MOTORCMD,
   ACL_SERIAL_NUM_MSGS
 } acl_msg_type_t;
 
@@ -41,10 +42,15 @@ typedef struct {
   uint16_t frequency;
 } acl_serial_rate_msg_t;
 
+typedef struct {
+  uint16_t percentage; // 0.0 - 100.0 fixed point (i.e., 50.5% == 505)
+} acl_serial_motorcmd_msg_t;
+
 // payload lengths
 static constexpr float ACL_SERIAL_PAYLOAD_LEN[] = {
   sizeof(acl_serial_imu_msg_t),
-  sizeof(acl_serial_rate_msg_t)
+  sizeof(acl_serial_rate_msg_t),
+  sizeof(acl_serial_motorcmd_msg_t)
 };
 
 // manually indicate the largest msg payload
@@ -176,6 +182,31 @@ inline size_t acl_serial_rate_msg_send_to_buffer(uint8_t *dst, const acl_serial_
 {
   acl_serial_message_t msg;
   acl_serial_rate_msg_pack(&msg, src);
+  return acl_serial_send_to_buffer(dst, &msg);
+}
+
+//=============================================================================
+// Motor command message
+//=============================================================================
+
+inline void acl_serial_motorcmd_msg_pack(acl_serial_message_t *dst, const acl_serial_motorcmd_msg_t *src)
+{
+  dst->type = ACL_SERIAL_MSG_MOTORCMD;
+  size_t offset = 0;
+  memcpy(dst->payload + offset, &src->percentage, sizeof(src->percentage)); offset += sizeof(src->percentage);
+  acl_serial_finalize_message(dst);
+}
+
+inline void acl_serial_motorcmd_msg_unpack(acl_serial_motorcmd_msg_t *dst, const acl_serial_message_t *src)
+{
+  size_t offset = 0;
+  memcpy(&dst->percentage, src->payload + offset, sizeof(dst->percentage)); offset += sizeof(dst->percentage);
+}
+
+inline size_t acl_serial_motorcmd_msg_send_to_buffer(uint8_t *dst, const acl_serial_motorcmd_msg_t *src)
+{
+  acl_serial_message_t msg;
+  acl_serial_motorcmd_msg_pack(&msg, src);
   return acl_serial_send_to_buffer(dst, &msg);
 }
 

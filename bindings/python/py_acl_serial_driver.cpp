@@ -34,10 +34,16 @@ PYBIND11_MODULE(acl_serial_driver, m)
           py::arg("frequency")=500)
     .def_readwrite("frequency", &acl_serial_rate_msg_t::frequency);
 
+  py::class_<acl_serial_motorcmd_msg_t>(m, "ACLSerialMotorCmdMsg")
+    .def(py::init<uint16_t>(),
+          py::arg("percentage")=0)
+    .def_readwrite("percentage", &acl_serial_motorcmd_msg_t::percentage);
+
   py::class_<acl::teensyimu::SerialDriver>(m, "ACLSerialDriver")
     .def(py::init<const std::string&, uint32_t>(),
           py::arg("port")="/dev/ttyACM0", py::arg("baud")=115200)
     .def("sendRate", &acl::teensyimu::SerialDriver::sendRate)
+    .def("sendMotorCmd", &acl::teensyimu::SerialDriver::sendMotorCmd)
     .def("registerCallbackIMU", &acl::teensyimu::SerialDriver::registerCallbackIMU)
     .def("registerCallbackRate", &acl::teensyimu::SerialDriver::registerCallbackRate)
     .def("unregisterCallbacks", &acl::teensyimu::SerialDriver::unregisterCallbacks, py::call_guard<py::gil_scoped_release>());

@@ -8,6 +8,12 @@
 
 ICM_20948_SPI myICM;     // SPI object to talk to ICM20948 IMU
 
+static constexpr int MOTOR_PIN = 15; // must be PWM capable, see:
+                                  // https://www.pjrc.com/teensy/td_pulse.html
+static constexpr int MOTOR_PWM_HZ = 50; // PWM frequency
+static constexpr int PWM_RES = 8; // PWM resolution (default 8 bits)
+static constexpr int PWM_MAX = (1 << PWM_RES) - 1; // maps to 100% duty cycle
+
 //=============================================================================
 // configuration options
 //=============================================================================
@@ -58,6 +64,12 @@ void setup()
   // baud doesn't really matter since USB
   // (make sure selected in menu: Tools > USB Type > Serial)
   Serial.begin(115200);
+
+  // Setup PWM pin for motor control
+  //  analogWriteResolution(12);
+  analogWriteFrequency(MOTOR_PIN, MOTOR_PWM_HZ);
+  pinMode(MOTOR_PIN, OUTPUT);
+  analogWrite(MOTOR_PIN, 0);
 
   SPI.begin();
   bool initialized = false;
@@ -180,11 +192,20 @@ void serialEvent()
     uint8_t in_byte = (uint8_t) Serial.read();
     if (acl_serial_parse_byte(in_byte, &msg_buf)) {
       switch (msg_buf.type) {
-      case ACL_SERIAL_MSG_RATE:
-        acl_serial_rate_msg_t rate_msg;
-        acl_serial_rate_msg_unpack(&rate_msg, &msg_buf);
-        handle_rate_msg(rate_msg);
-        break;
+        case ACL_SERIAL_MSG_RATE:
+        {
+          acl_serial_rate_msg_t msg;
+          acl_serial_rate_msg_unpack(&msg, &msg_buf);
+          handle_rate_msg(msg);
+          break;
+        }
+        case ACL_SERIAL_MSG_MOTORCMD:
+        {
+          acl_serial_motorcmd_msg_t msg;
+          acl_serial_motorcmd_msg_unpack(&msg, &msg_buf);
+          handle_motorcmd_msg(msg);
+          break;
+        }
       }
     }
   }
@@ -197,4 +218,10 @@ void serialEvent()
 void handle_rate_msg(const acl_serial_rate_msg_t& msg)
 {
   update_sample_rate(msg.frequency);
+}
+
+void handle_motorcmd_msg(const acl_serial_motorcmd_msg_t& msg)
+{
+  uint16_t value = static_cast<uint16_t>((msg.percentage / 1000.) * PWM_MAX);
+  analogWrite(MOTOR_PIN, value);
 }

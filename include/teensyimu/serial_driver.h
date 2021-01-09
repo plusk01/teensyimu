@@ -28,6 +28,7 @@ namespace teensyimu {
     ~SerialDriver();
 
     void sendRate(const acl_serial_rate_msg_t& msg);
+    void sendMotorCmd(const acl_serial_motorcmd_msg_t& msg);
 
     void registerCallbackIMU(CallbackIMU cb);
     void registerCallbackRate(CallbackRate cb);

@@ -47,6 +47,15 @@ void SerialDriver::sendRate(const acl_serial_rate_msg_t& msg)
 }
 
 // ----------------------------------------------------------------------------
+
+void SerialDriver::sendMotorCmd(const acl_serial_motorcmd_msg_t& msg)
+{
+  uint8_t buf[ACL_SERIAL_MAX_MESSAGE_LEN];
+  const size_t len = acl_serial_motorcmd_msg_send_to_buffer(buf, &msg);
+  serial_->send_bytes(buf, len);
+}
+
+// ----------------------------------------------------------------------------
 // Callback stuff
 // ----------------------------------------------------------------------------
 
