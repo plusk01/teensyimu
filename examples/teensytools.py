@@ -16,6 +16,15 @@ def find_teensy():
     return None
 
 
+def initialize_driver():
+    port = tt.find_teensy()
+    if port is None:
+        raise ConnectionError("Could not find Teensy! Is it plugged in?")
+    driver = ACLSerialDriver(port)
+    time.sleep(0.1)
+    return driver
+
+
 def getstats(data):
     hz = 1./getTs(data)
     print('Sample rate: {:.0f} Hz'.format(hz))
