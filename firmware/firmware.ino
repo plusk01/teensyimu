@@ -10,7 +10,7 @@ ICM_20948_SPI myICM;     // SPI object to talk to ICM20948 IMU
 
 static constexpr int MOTOR_PIN = 15; // must be PWM capable, see:
                                   // https://www.pjrc.com/teensy/td_pulse.html
-static constexpr int MOTOR_PWM_HZ = 50; // PWM frequency
+static constexpr int MOTOR_PWM_HZ = 2000; // PWM frequency
 static constexpr int PWM_RES = 8; // PWM resolution (default 8 bits)
 static constexpr int PWM_MAX = (1 << PWM_RES) - 1; // maps to 100% duty cycle
 
@@ -34,6 +34,7 @@ acl_serial_message_t msg_buf;
 
 // timing
 uint32_t sensor_poll_previous_us = 0;
+uint32_t start_time_us = 0;
 
 // computed constants
 static constexpr double DEG2RAD = M_PI/180.;
@@ -66,7 +67,7 @@ void setup()
   Serial.begin(115200);
 
   // Setup PWM pin for motor control
-  //  analogWriteResolution(12);
+  analogWriteResolution(PWM_RES);
   analogWriteFrequency(MOTOR_PIN, MOTOR_PWM_HZ);
   pinMode(MOTOR_PIN, OUTPUT);
   analogWrite(MOTOR_PIN, 0);
@@ -159,7 +160,7 @@ void setup()
 
 void loop()
 {
-  uint32_t current_time_us = micros();
+  uint32_t current_time_us = micros() - start_time_us;
  
   if (current_time_us >= sensor_poll_previous_us + SENSOR_POLL_INTERVAL_US) {
 
@@ -217,6 +218,8 @@ void serialEvent()
 
 void handle_rate_msg(const acl_serial_rate_msg_t& msg)
 {
+  start_time_us = micros();
+  sensor_poll_previous_us = 0;
   update_sample_rate(msg.frequency);
 }
 
