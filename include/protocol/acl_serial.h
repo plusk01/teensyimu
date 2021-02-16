@@ -13,6 +13,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef __GNUC__
+#define PACKED_STRUCT(name) struct __attribute__((__packed__)) name
+#else
+#define PACKED_STRUCT(name) __pragma(pack(push, 1)) struct name __pragma(pack(pop))
+#endif
+
 //=============================================================================
 // message types
 //=============================================================================
@@ -62,7 +68,7 @@ static constexpr size_t ACL_SERIAL_MAX_PAYLOAD_LEN = sizeof(acl_serial_imu_msg_t
 
 static constexpr uint8_t ACL_SERIAL_MAGIC = 0xA5;
 
-struct __attribute__((packed)) acl_serial_message_t {
+PACKED_STRUCT(acl_serial_message_t) {
   uint8_t magic;
   uint8_t type;
   uint8_t payload[ACL_SERIAL_MAX_PAYLOAD_LEN];
