@@ -14,6 +14,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 # Options
 ###############################################################################
 
+option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_BINDINGS_PYTHON "Build Python bindings" ON)
 
 ###############################################################################
@@ -44,7 +45,8 @@ endif()
 # Targets
 ###############################################################################
 
-add_library(acl_serial_driver SHARED src/serial_driver.cpp)
+add_library(acl_serial_driver src/serial_driver.cpp)
+set_target_properties(acl_serial_driver PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(acl_serial_driver PRIVATE async_comm)
 target_include_directories(acl_serial_driver PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
