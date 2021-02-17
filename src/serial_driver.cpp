@@ -39,19 +39,27 @@ SerialDriver::~SerialDriver()
 // Send message methods
 // ----------------------------------------------------------------------------
 
-void SerialDriver::sendRate(const acl_serial_rate_msg_t& msg)
+void SerialDriver::sendRate(uint16_t frequency)
 {
-  uint8_t buf[ACL_SERIAL_MAX_MESSAGE_LEN];
-  const size_t len = acl_serial_rate_msg_send_to_buffer(buf, &msg);
+  // put into standard message
+  ti_serial_rate_msg_t msg;
+  msg.frequency = frequency;
+
+  uint8_t buf[TI_SERIAL_MAX_MESSAGE_LEN];
+  const size_t len = ti_serial_rate_msg_send_to_buffer(buf, &msg);
   serial_->send_bytes(buf, len);
 }
 
 // ----------------------------------------------------------------------------
 
-void SerialDriver::sendMotorCmd(const acl_serial_motorcmd_msg_t& msg)
+void SerialDriver::sendMotorCmd(double percentage)
 {
-  uint8_t buf[ACL_SERIAL_MAX_MESSAGE_LEN];
-  const size_t len = acl_serial_motorcmd_msg_send_to_buffer(buf, &msg);
+  // put into standard message
+  ti_serial_motorcmd_msg_t msg;
+  msg.percentage = static_cast<uint16_t>(percentage * 10);
+
+  uint8_t buf[TI_SERIAL_MAX_MESSAGE_LEN];
+  const size_t len = ti_serial_motorcmd_msg_send_to_buffer(buf, &msg);
   serial_->send_bytes(buf, len);
 }
 
@@ -89,15 +97,15 @@ void SerialDriver::unregisterCallbacks()
 
 void SerialDriver::callback(const uint8_t * data, size_t len)
 {
-  acl_serial_message_t msg;
+  ti_serial_message_t msg;
   for (size_t i=0; i<len; ++i) {
-    if (acl_serial_parse_byte(data[i], &msg)) {
+    if (ti_serial_parse_byte(data[i], &msg)) {
 
       switch (msg.type) {
-        case ACL_SERIAL_MSG_IMU:
+        case TI_SERIAL_MSG_IMU:
           handleIMUMsg(msg);
           break;
-        case ACL_SERIAL_MSG_RATE:
+        case TI_SERIAL_MSG_RATE:
           handleRateMsg(msg);
           break;
       }
@@ -108,10 +116,10 @@ void SerialDriver::callback(const uint8_t * data, size_t len)
 
 // ----------------------------------------------------------------------------
 
-void SerialDriver::handleIMUMsg(const acl_serial_message_t& msg)
+void SerialDriver::handleIMUMsg(const ti_serial_message_t& msg)
 {
-  acl_serial_imu_msg_t imu;
-  acl_serial_imu_msg_unpack(&imu, &msg);
+  ti_serial_imu_msg_t imu;
+  ti_serial_imu_msg_unpack(&imu, &msg);
 
   std::lock_guard<std::mutex> lock(mtx_);
   if (cb_imu_) cb_imu_(imu);
@@ -119,10 +127,10 @@ void SerialDriver::handleIMUMsg(const acl_serial_message_t& msg)
 
 // ----------------------------------------------------------------------------
 
-void SerialDriver::handleRateMsg(const acl_serial_message_t& msg)
+void SerialDriver::handleRateMsg(const ti_serial_message_t& msg)
 {
-  acl_serial_rate_msg_t rate;
-  acl_serial_rate_msg_unpack(&rate, &msg);
+  ti_serial_rate_msg_t rate;
+  ti_serial_rate_msg_unpack(&rate, &msg);
 
   std::lock_guard<std::mutex> lock(mtx_);
   if (cb_rate_) cb_rate_(rate);

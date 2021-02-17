@@ -1,6 +1,6 @@
 #include <ICM_20948.h>  // Click here to get the library: http://librarymanager/All#SparkFun_ICM_20948_IMU
 
-#include "acl_serial.h"
+#include "teensyimu_serial.h"
 
 
 #define SPI_FREQ 6000000 // ICM20948 has max 7 MHz SPI, but >6 MHz breaks
@@ -29,8 +29,8 @@ static constexpr float g = 9.80665f;
 //=============================================================================
 
 // serial stuff
-uint8_t out_buf[ACL_SERIAL_MAX_MESSAGE_LEN];
-acl_serial_message_t msg_buf;
+uint8_t out_buf[TI_SERIAL_MAX_MESSAGE_LEN];
+ti_serial_message_t msg_buf;
 
 // timing
 uint32_t sensor_poll_previous_us = 0;
@@ -48,10 +48,10 @@ void update_sample_rate(uint16_t rate)
   SENSOR_POLL_INTERVAL_US = static_cast<uint32_t>(1e6 / rate);
   
   // pack and ship rate info
-  acl_serial_rate_msg_t rate_msg;
+  ti_serial_rate_msg_t rate_msg;
   rate_msg.frequency = rate;
  
-  const size_t len = acl_serial_rate_msg_send_to_buffer(out_buf, &rate_msg);
+  const size_t len = ti_serial_rate_msg_send_to_buffer(out_buf, &rate_msg);
   Serial.write(out_buf, len);
 }
 
@@ -144,8 +144,8 @@ void setup()
 
   // Choose whether or not to use DLPF
   // Here we're also showing another way to access the status values, and that it is OK to supply individual sensor masks to these functions
-  ICM_20948_Status_e accDLPEnableStat = myICM.enableDLPF( ICM_20948_Internal_Acc, false );
-  ICM_20948_Status_e gyrDLPEnableStat = myICM.enableDLPF( ICM_20948_Internal_Gyr, false );
+  myICM.enableDLPF( ICM_20948_Internal_Acc, false );
+  myICM.enableDLPF( ICM_20948_Internal_Gyr, false );
 
   //
   // Transmit configuration info
@@ -167,7 +167,7 @@ void loop()
     myICM.getAGMT();                // The values are only updated when you call 'getAGMT'
 
     // pack and ship IMU data
-    acl_serial_imu_msg_t imu_msg;
+    ti_serial_imu_msg_t imu_msg;
     imu_msg.t_us = current_time_us;
     imu_msg.accel_x = myICM.accX()*1e-3 * g;
     imu_msg.accel_y = myICM.accY()*1e-3 * g;
@@ -176,7 +176,7 @@ void loop()
     imu_msg.gyro_y = myICM.gyrY() * DEG2RAD;
     imu_msg.gyro_z = myICM.gyrZ() * DEG2RAD;
    
-    const size_t len = acl_serial_imu_msg_send_to_buffer(out_buf, &imu_msg);
+    const size_t len = ti_serial_imu_msg_send_to_buffer(out_buf, &imu_msg);
     Serial.write(out_buf, len);
 
     sensor_poll_previous_us = current_time_us;
@@ -191,19 +191,19 @@ void serialEvent()
 {
   while (Serial.available()) {
     uint8_t in_byte = (uint8_t) Serial.read();
-    if (acl_serial_parse_byte(in_byte, &msg_buf)) {
+    if (ti_serial_parse_byte(in_byte, &msg_buf)) {
       switch (msg_buf.type) {
-        case ACL_SERIAL_MSG_RATE:
+        case TI_SERIAL_MSG_RATE:
         {
-          acl_serial_rate_msg_t msg;
-          acl_serial_rate_msg_unpack(&msg, &msg_buf);
+          ti_serial_rate_msg_t msg;
+          ti_serial_rate_msg_unpack(&msg, &msg_buf);
           handle_rate_msg(msg);
           break;
         }
-        case ACL_SERIAL_MSG_MOTORCMD:
+        case TI_SERIAL_MSG_MOTORCMD:
         {
-          acl_serial_motorcmd_msg_t msg;
-          acl_serial_motorcmd_msg_unpack(&msg, &msg_buf);
+          ti_serial_motorcmd_msg_t msg;
+          ti_serial_motorcmd_msg_unpack(&msg, &msg_buf);
           handle_motorcmd_msg(msg);
           break;
         }
@@ -216,14 +216,14 @@ void serialEvent()
 // handle received messages
 //=============================================================================
 
-void handle_rate_msg(const acl_serial_rate_msg_t& msg)
+void handle_rate_msg(const ti_serial_rate_msg_t& msg)
 {
   start_time_us = micros(); // reset start time
   sensor_poll_previous_us = 0;
   update_sample_rate(msg.frequency);
 }
 
-void handle_motorcmd_msg(const acl_serial_motorcmd_msg_t& msg)
+void handle_motorcmd_msg(const ti_serial_motorcmd_msg_t& msg)
 {
   uint16_t value = static_cast<uint16_t>((msg.percentage / 1000.) * PWM_MAX);
   analogWrite(MOTOR_PIN, value);

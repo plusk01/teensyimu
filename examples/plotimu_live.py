@@ -3,7 +3,7 @@ import time, sys
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
 
-from acl_serial_driver import ACLSerialDriver, ACLSerialRateMsg
+import teensyimu as ti
 
 At = []
 Ax = []
@@ -35,23 +35,12 @@ def imu_cb(msg):
       Ay.pop(0)
       Az.pop(0)
 
-def find_teensy():
-    import serial.tools.list_ports
-    for port in serial.tools.list_ports.comports():
-        if port.manufacturer and port.manufacturer.lower() == 'teensyduino':
-            return port.device
-    return None
-
 def main():
-    port = find_teensy()
-    if port is None:
-        print("Could not find Teensy!")
-        sys.exit()
-
-    driver = ACLSerialDriver(port)
+    port = ti.tools.find_teensy_or_die()
+    driver = ti.SerialDriver(port)
     time.sleep(0.1)
     driver.registerCallbackIMU(imu_cb)
-    driver.sendRate(ACLSerialRateMsg(500))
+    driver.sendRate(500)
 
     # https://pyqtgraph.readthedocs.io/en/latest/plotting.html#examples
     pw = pg.plot(title="Accelerometer")

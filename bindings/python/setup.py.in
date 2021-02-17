@@ -1,12 +1,12 @@
 from setuptools import setup
 
 setup(
-    name='acl_serial_driver',
+    name='teensyimu',
     version='0.1',
     author='Parker Lusk',
     author_email='plusk@mit.edu',
-    description='ACL serial driver for Teensy-IMU',
+    description='Serial driver and tools for Teensy IMU board',
 #    package_dir={'': '${CMAKE_CURRENT_BINARY_DIR}'}, # win32 doesn't like -- paths should be relative
-    packages=['acl_serial_driver'],
+    packages=['teensyimu'],
     package_data={'': ['*.so',  '*.pyd']}
 )

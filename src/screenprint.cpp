@@ -22,7 +22,7 @@ uint32_t last_t_us = 0;
  *
  * @param[in]  msg   The unpacked IMU message
  */
-void callback(const acl_serial_imu_msg_t& msg)
+void callback(const ti_serial_imu_msg_t& msg)
 {
   const double dt = (msg.t_us - last_t_us) * 1e-6; // us to s
   const double hz = 1. / dt;
@@ -49,7 +49,7 @@ void callback(const acl_serial_imu_msg_t& msg)
             << ss.str() << std::endl;
 }
 
-void rateCb(const acl_serial_rate_msg_t& msg)
+void rateCb(const ti_serial_rate_msg_t& msg)
 {
   std::cout << std::endl << "***************************" << std::endl;
   std::cout << "Sample Rate: " << msg.frequency << " Hz" << std::endl;
@@ -68,9 +68,7 @@ int main(int argc, char const *argv[])
 
   std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-  acl_serial_rate_msg_t msg;
-  msg.frequency = 100;
-  driver.sendRate(msg);
+  driver.sendRate(100);
 
   // spin forever and let CPU do other things (no busy waiting)
   std::promise<void>().get_future().wait();

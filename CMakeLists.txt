@@ -45,12 +45,12 @@ endif()
 # Targets
 ###############################################################################
 
-add_library(acl_serial_driver src/serial_driver.cpp)
-set_target_properties(acl_serial_driver PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(acl_serial_driver PRIVATE async_comm)
-target_include_directories(acl_serial_driver PUBLIC
+add_library(teensyimu src/serial_driver.cpp)
+set_target_properties(teensyimu PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(teensyimu PRIVATE async_comm)
+target_include_directories(teensyimu PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
 
 add_executable(screenprint src/screenprint.cpp)
-target_link_libraries(screenprint acl_serial_driver)
+target_link_libraries(screenprint teensyimu)

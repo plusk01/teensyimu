@@ -11,15 +11,15 @@
 #include <mutex>
 #include <string>
 
-#include "protocol/acl_serial.h"
+#include "protocol/teensyimu_serial.h"
 
 namespace async_comm { class Serial; }
 
 namespace acl {
 namespace teensyimu {
 
-  using CallbackIMU = std::function<void(const acl_serial_imu_msg_t&)>;
-  using CallbackRate = std::function<void(const acl_serial_rate_msg_t&)>;
+  using CallbackIMU = std::function<void(const ti_serial_imu_msg_t&)>;
+  using CallbackRate = std::function<void(const ti_serial_rate_msg_t&)>;
 
   class SerialDriver
   {
@@ -27,8 +27,8 @@ namespace teensyimu {
     SerialDriver(const std::string& port = "/dev/ttyACM0", uint32_t baud = 115200);
     ~SerialDriver();
 
-    void sendRate(const acl_serial_rate_msg_t& msg);
-    void sendMotorCmd(const acl_serial_motorcmd_msg_t& msg);
+    void sendRate(uint16_t frequency);
+    void sendMotorCmd(double percentage); // 0 <= percentage <= 100
 
     void registerCallbackIMU(CallbackIMU cb);
     void registerCallbackRate(CallbackRate cb);
@@ -42,8 +42,8 @@ namespace teensyimu {
 
     void callback(const uint8_t * data, size_t len);
 
-    void handleIMUMsg(const acl_serial_message_t& msg);
-    void handleRateMsg(const acl_serial_message_t& msg);
+    void handleIMUMsg(const ti_serial_message_t& msg);
+    void handleRateMsg(const ti_serial_message_t& msg);
   };
 
 } // ns teensyimu

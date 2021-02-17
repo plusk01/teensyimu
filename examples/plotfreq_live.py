@@ -7,7 +7,7 @@ import numpy as np
 from scipy import signal
 from scipy.fft import fft, fftfreq, fftshift
 
-from acl_serial_driver import ACLSerialDriver, ACLSerialRateMsg
+import teensyimu as ti
 
 class IMUAnalyzer:
     # Number of samples used to calculate DFT via FFT
@@ -74,9 +74,9 @@ class IMUAnalyzer:
         #
 
         # initialize serial communications to Teensy
-        self.driver = ACLSerialDriver(port)
+        self.driver = ti.SerialDriver(port)
         time.sleep(0.1) # wait for everything to initialize
-        self.driver.sendRate(ACLSerialRateMsg(1000))
+        self.driver.sendRate(1000)
 
         # Connect an IMU callback that will fire when a sample arrives
         self.driver.registerCallbackIMU(self._imu_cb)
@@ -167,19 +167,8 @@ class IMUAnalyzer:
 
         return f, Y
 
-def find_teensy():
-    import serial.tools.list_ports
-    for port in serial.tools.list_ports.comports():
-        if port.manufacturer and port.manufacturer.lower() == 'teensyduino':
-            return port.device
-    return None
-
 def main():
-    port = find_teensy()
-    if port is None:
-        print("Could not find Teensy!")
-        sys.exit()
-
+    port = ti.tools.find_teensy_or_die()
     analyzer = IMUAnalyzer(port)
 
 if __name__ == '__main__':
