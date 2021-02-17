@@ -7,7 +7,7 @@ import numpy as np
 from scipy import signal
 from scipy.fft import fft, fftfreq, fftshift
 
-from acl_serial_driver import ACLSerialDriver
+from acl_serial_driver import ACLSerialDriver, ACLSerialRateMsg
 
 class IMUAnalyzer:
     # Number of samples used to calculate DFT via FFT
@@ -24,7 +24,7 @@ class IMUAnalyzer:
     SAMPLE_PLOT_FREQ_HZ = 20
 
     # Which sensor to analyze
-    SENSOR = 'gyro' # 'accel' or 'gyro'
+    SENSOR = 'accel' # 'accel' or 'gyro'
 
     def __init__(self, port):
 
@@ -76,6 +76,7 @@ class IMUAnalyzer:
         # initialize serial communications to Teensy
         self.driver = ACLSerialDriver(port)
         time.sleep(0.1) # wait for everything to initialize
+        self.driver.sendRate(ACLSerialRateMsg(1000))
 
         # Connect an IMU callback that will fire when a sample arrives
         self.driver.registerCallbackIMU(self._imu_cb)

@@ -218,7 +218,7 @@ void serialEvent()
 
 void handle_rate_msg(const acl_serial_rate_msg_t& msg)
 {
-  start_time_us = micros();
+  start_time_us = micros(); // reset start time
   sensor_poll_previous_us = 0;
   update_sample_rate(msg.frequency);
 }

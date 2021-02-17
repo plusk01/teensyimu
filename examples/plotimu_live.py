@@ -3,7 +3,7 @@ import time, sys
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
 
-from acl_serial_driver import ACLSerialDriver
+from acl_serial_driver import ACLSerialDriver, ACLSerialRateMsg
 
 At = []
 Ax = []
@@ -51,6 +51,7 @@ def main():
     driver = ACLSerialDriver(port)
     time.sleep(0.1)
     driver.registerCallbackIMU(imu_cb)
+    driver.sendRate(ACLSerialRateMsg(500))
 
     # https://pyqtgraph.readthedocs.io/en/latest/plotting.html#examples
     pw = pg.plot(title="Accelerometer")

@@ -5,9 +5,11 @@
  * @date 21 Nov 2020
  */
 
+#include <chrono>
 #include <future>
 #include <iomanip>
 #include <iostream>
+#include <thread>
 #include <sstream>
 
 #include <teensyimu/serial_driver.h>
@@ -49,7 +51,9 @@ void callback(const acl_serial_imu_msg_t& msg)
 
 void rateCb(const acl_serial_rate_msg_t& msg)
 {
+  std::cout << std::endl << "***************************" << std::endl;
   std::cout << "Sample Rate: " << msg.frequency << " Hz" << std::endl;
+  std::cout << "***************************" << std::endl << std::endl;
 }
 
 int main(int argc, char const *argv[])
@@ -61,6 +65,12 @@ int main(int argc, char const *argv[])
   acl::teensyimu::SerialDriver driver(port);
   driver.registerCallbackIMU(callback);
   driver.registerCallbackRate(rateCb);
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+  acl_serial_rate_msg_t msg;
+  msg.frequency = 100;
+  driver.sendRate(msg);
 
   // spin forever and let CPU do other things (no busy waiting)
   std::promise<void>().get_future().wait();
