@@ -43,6 +43,24 @@ static constexpr double DEG2RAD = M_PI/180.;
 // Helper functions
 //=============================================================================
 
+/**
+ * If Data Terminal Ready (DTR) is not high (i.e., no device connected),
+ * then the serialEvent may fire and read back what was wrote one byte at
+ * a time. This is undesirable as it will put the parser in an unknown state
+ * (or something else breaks? not sure exactly). This function checks that
+ * there is a device listening for USB serial before writing. If not, the data
+ * is simply thrown away.
+ */
+bool safe_serial_write(const uint8_t* buf, size_t len)
+{
+  if (Serial.dtr()) {
+    Serial.write(buf, len);
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void update_sample_rate(uint16_t rate)
 {
   SENSOR_POLL_INTERVAL_US = static_cast<uint32_t>(1e6 / rate);
@@ -52,7 +70,7 @@ void update_sample_rate(uint16_t rate)
   rate_msg.frequency = rate;
  
   const size_t len = ti_serial_rate_msg_send_to_buffer(out_buf, &rate_msg);
-  Serial.write(out_buf, len);
+  safe_serial_write(out_buf, len);
 }
 
 //=============================================================================
@@ -151,7 +169,8 @@ void setup()
   // Transmit configuration info
   //
 
-  update_sample_rate(static_cast<uint16_t>(1e6/SENSOR_POLL_INTERVAL_US));
+  // this seems to break serial / not work anyways (see safe_serial_write)
+//  update_sample_rate(static_cast<uint16_t>(1e6/SENSOR_POLL_INTERVAL_US));
 }
 
 //=============================================================================
@@ -177,7 +196,7 @@ void loop()
     imu_msg.gyro_z = myICM.gyrZ() * DEG2RAD;
    
     const size_t len = ti_serial_imu_msg_send_to_buffer(out_buf, &imu_msg);
-    Serial.write(out_buf, len);
+    safe_serial_write(out_buf, len);
 
     sensor_poll_previous_us = current_time_us;
   }
