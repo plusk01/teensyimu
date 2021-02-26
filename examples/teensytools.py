@@ -5,22 +5,12 @@ from pyqtgraph.Qt import QtCore, QtGui
 
 import matplotlib.pyplot as plt
 
-from acl_serial_driver import ACLSerialDriver, ACLSerialRateMsg
-
-
-def find_teensy():
-    import serial.tools.list_ports
-    for port in serial.tools.list_ports.comports():
-        if port.manufacturer and port.manufacturer.lower() == 'teensyduino':
-            return port.device
-    return None
+import teensyimu as ti
 
 
 def initialize_driver():
-    port = tt.find_teensy()
-    if port is None:
-        raise ConnectionError("Could not find Teensy! Is it plugged in?")
-    driver = ACLSerialDriver(port)
+    port = ti.tools.find_teensy_or_die()
+    driver = ti.SerialDriver(port)
     time.sleep(0.1)
     return driver
 
@@ -50,17 +40,13 @@ def csvread(file):
 
 class batch:
     def capture(Fs, seconds=1):
-        port = find_teensy()
-        if port is None:
-            raise ConnectionError("Could not find Teensy!")
-
-
         data = []
         def imu_cb(msg):
             data.append([msg.t_us*1e-6, msg.accel_x, msg.accel_y, msg.accel_z, msg.gyro_x, msg.gyro_y, msg.gyro_z])
 
-        driver = ACLSerialDriver(port)
-        driver.sendRate(ACLSerialRateMsg(Fs))
+        port = ti.tools.find_teensy_or_die()
+        driver = ti.SerialDriver(port)
+        driver.sendRate(Fs)
         time.sleep(0.1)
         driver.registerCallbackIMU(imu_cb)
 
@@ -101,10 +87,6 @@ class batch:
 
 class online:
     def liveplot(Fs, Fplot=20, window_seconds=5, seconds=60):
-        port = find_teensy()
-        if port is None:
-            raise ConnectionError("Could not find Teensy!")
-
 
         data = []
         pdata = []
@@ -116,8 +98,9 @@ class online:
             if len(pdata) > Fs * window_seconds:
                 pdata.pop(0)
 
-        driver = ACLSerialDriver(port)
-        driver.sendRate(ACLSerialRateMsg(Fs))
+        port = ti.tools.find_teensy_or_die()
+        driver = ti.SerialDriver(port)
+        driver.sendRate(Fs)
         time.sleep(0.1)
         driver.registerCallbackIMU(imu_cb)
 
@@ -148,11 +131,6 @@ class online:
 
 
     def process(Fs, cb, plotCb=None, plot_raw=True, Fplot=20, window_seconds=5, seconds=60):
-        port = find_teensy()
-        if port is None:
-            raise ConnectionError("Could not find Teensy!")
-
-
         data = []
         pdata = []
         dataf = []
@@ -176,8 +154,9 @@ class online:
                 if len(pdataf) > Fs * window_seconds:
                     pdataf.pop(0)
 
-        driver = ACLSerialDriver(port)
-        driver.sendRate(ACLSerialRateMsg(Fs))
+        port = ti.tools.find_teensy_or_die()
+        driver = ti.SerialDriver(port)
+        driver.sendRate(Fs)
         time.sleep(0.1)
         driver.registerCallbackIMU(imu_cb)
 
