@@ -18,6 +18,14 @@ add_custom_command(TARGET py_teensyimu POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_SOURCE_DIR}/tools.py $<TARGET_FILE_DIR:py_teensyimu>)
 
+add_custom_command(TARGET py_teensyimu POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../examples/plotimu.py $<TARGET_FILE_DIR:py_teensyimu>)
+
+add_custom_command(TARGET py_teensyimu POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../examples/plotfreq.py $<TARGET_FILE_DIR:py_teensyimu>)
+
 # Create the Python package -- Note that "." is used to conform to PEP 328
 file(WRITE "${PYPKG_DIR}/__init__.py"
     "from .teensyimu import *\n"

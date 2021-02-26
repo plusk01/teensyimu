@@ -23,10 +23,10 @@ class IMUAnalyzer:
     # Plotting frequency for time-domain signals
     SAMPLE_PLOT_FREQ_HZ = 20
 
-    # Which sensor to analyze
-    SENSOR = 'accel' # 'accel' or 'gyro'
+    def __init__(self, port, sensor='accel'):
 
-    def __init__(self, port):
+        # Which sensor to analyze
+        self.sensor = sensor # 'accel' or 'gyro'
 
         #
         # FFT setup
@@ -49,7 +49,7 @@ class IMUAnalyzer:
         # Plotting setup
         #
 
-        sens = "Accelerometer" if self.SENSOR == 'accel' else "Gyro"
+        sens = "Accelerometer" if self.sensor == 'accel' else "Gyro"
 
         # initialize Qt gui application and window
         self.default_window_size = (1000, 800)
@@ -114,7 +114,7 @@ class IMUAnalyzer:
                         msg.accel_x, msg.accel_y, msg.accel_z,
                         msg.gyro_x, msg.gyro_y, msg.gyro_z))
 
-        if self.SENSOR == 'accel':
+        if self.sensor == 'accel':
             sensx = msg.accel_x
             sensy = msg.accel_y
             sensz = msg.accel_z
@@ -167,9 +167,7 @@ class IMUAnalyzer:
 
         return f, Y
 
-def main():
-    port = ti.tools.find_teensy_or_die()
-    analyzer = IMUAnalyzer(port)
-
 if __name__ == '__main__':
-    main()
+    port = ti.tools.find_teensy_or_die()
+    sensor = 'accel' # 'accel' or 'gyro'
+    analyzer = IMUAnalyzer(port, sensor)
