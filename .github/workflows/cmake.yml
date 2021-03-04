@@ -21,9 +21,15 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Install Boost
-      run: sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
+      run: |
+        wget https://dl.bintray.com/boostorg/release/1.75.0/source/boost_1_75_0.tar.gz
+        tar zxvf boost_1_75_0.tar.gz
+        cd boost_1_75_0
+        ./bootstrap.sh --prefix=/opt/boost
+        ./b2 --with-system cxxflags=-fPIC cflags=-fPIC install
 
     - name: Setup tmate session
+      if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
 
     - name: Create Build Environment
@@ -39,7 +45,7 @@ jobs:
       # Note the current convention is to use the -S and -B options here to specify source 
       # and build directories, but this is only available with CMake 3.13 and higher.  
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBOOST_ROOT=/opt/boost -DBoost_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
 
     - name: Build
       working-directory: ${{github.workspace}}/build
