@@ -3,7 +3,17 @@ Real-time IMU Processing from Teensy
 
 Supporting software to stream IMU (Adafruit ICM-20948) connected to Teensy 4.0 via SPI onto desktop computer via serial. Serial IO is handled in C++ and exposed to Python with pybind11.
 
-## Installing via `pip`
+## Getting Started
+
+This repo provides the `teensytools` Python package to allow easy access to the hardware from Python. The Python package includes the C++ serial driver for quickly communicating with the teensy. The C++ is transparent to the user via `pybind11`. This Python package can be installed using the pre-built binaries via `pip` or by building from source yourself.
+
+Once `teensytools` is installed on your machine, you will be able to quickly plot data (see **Examples** below) like:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wiki/plusk01/teensyimu/assets/teensy.plotfreq.png" width="70%" />
+</p>
+
+### Installing via `pip`
 
 For the following systems, the `teensyimu` Python package can be easily installed using `pip` and without requiring building from source: `ubuntu-18.04`, `ubuntu20.04`, `macos-catalina` (potentially `macos-bigsur`), `windows-10`. To do this, we will leverage the pre-built binaries posted on the [releases page](https://github.com/plusk01/teensyimu/releases).
 
@@ -15,9 +25,10 @@ $ pip install https://github.com/plusk01/teensyimu/releases/download/0.1/teensyi
 
 Once installed, the installation can be verified with `python -m teensyimu.plotimu`. If the device is not plugged in, you should see a message (`Could not find Teensy!`) and the script should quit gracefully. If the device is plugged in data should apppear in the terminal and a plot should open.
 
-## Building from Source
+### Building from Source
 
-### MacOS / Linux Build
+<details>
+  <summary>Linux / MacOS</summary>
 
 After cloning this project onto your computer:
 
@@ -29,8 +40,13 @@ After cloning this project onto your computer:
   cmake ..
   make
   ```
+  
+Once the package builds successfully, you can install the `teensyimu` Python package as described below.
 
-### Windows Build
+</details>
+
+<details>
+  <summary>Windows</summary>
 
 Compilation of this package has been tested on a Windows 10 machine. The environment was setup as follows. Explicit versions used are listed, but these steps are expected to work with reasonably recent versions of these tools.
 
@@ -54,9 +70,14 @@ $ cmake --build . --target pypkg --config Release # to tar python pkg
 
 Once the package builds successfully, you can install the `teensyimu` Python package as described below.
 
+</details>
+
 ### Installing Python Package from Source
 
-This repo provides the `teensytools` Python package to allow easy access to the hardware from Python.
+<details>
+  <summary>Installing Python Package from Source</summary>
+
+Install the built-from-source Python package with `pip`:
 
 ```bash
 cd build
@@ -64,11 +85,15 @@ cd bindings/python
 pip install .
 ```
 
+</details>
+
 ## Setting up the Teensy firmware
 
 Flash Teensy with `firmware/firmware.ino` sketch.
 
 ## Example
+
+See an IMU data plot in real-time with `python -m teensyimu.plotimu`. Alternatively, you can see the frequency spectrum with `python -m teensyimu.plotfreq`
 
 Plot IMU data in real-time by running the `plotimu_live.py` script in `examples`. Make sure to install `pyqtgraph` with `pip install pyqtgraph`.
 
