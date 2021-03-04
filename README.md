@@ -15,6 +15,8 @@ Once `teensytools` is installed on your machine, you will be able to quickly plo
 
 ### Installing via `pip`
 
+***Note**: Only Python 3 is supported. When a command uses `python` or `pip`, you may need to replace with `python3` or `pip3` depending on your system. You can always use `python --version` or `pip --version` to check which version is being used.*
+
 For the following systems, the `teensyimu` Python package can be easily installed using `pip` and without requiring building from source: `ubuntu-18.04`, `ubuntu20.04`, `macos-catalina` (potentially `macos-bigsur`), `windows-10`. To do this, we will leverage the pre-built binaries posted on the [releases page](https://github.com/plusk01/teensyimu/releases).
 
 Under the desired release version, expand the **Assets** list. Then, right-click the appropriate `*.tar.gz` link and copy the link address. You can simply direct `pip` to install the package at the URL. For example, using release version 0.1 on macos you would run:
