@@ -34,7 +34,7 @@ jobs:
         tar zxf boost_1_75_0.tar.gz
         cd boost_1_75_0
         ./bootstrap.sh --prefix=/opt/boost
-        ./b2 --with-system cxxflags=-fPIC cflags=-fPIC install
+        sudo ./b2 --with-system cxxflags=-fPIC cflags=-fPIC install
 
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
