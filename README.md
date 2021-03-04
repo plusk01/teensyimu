@@ -72,8 +72,6 @@ Once the package builds successfully, you can install the `teensyimu` Python pac
 
 </details>
 
-### Installing Python Package from Source
-
 <details>
   <summary>Installing Python Package from Source</summary>
 
@@ -91,9 +89,6 @@ pip install .
 
 Flash Teensy with `firmware/firmware.ino` sketch.
 
-## Example
+## Examples
 
 See an IMU data plot in real-time with `python -m teensyimu.plotimu`. Alternatively, you can see the frequency spectrum with `python -m teensyimu.plotfreq`
-
-Plot IMU data in real-time by running the `plotimu_live.py` script in `examples`. Make sure to install `pyqtgraph` with `pip install pyqtgraph`.
-
