@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
+        os: [ubuntu-18.04, ubuntu-20.04, macos-10.15, windows-latest]
     
     env:
       BOOST_ROOT : "/usr/local/share/boost/1.72.0"
@@ -54,18 +54,12 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
       
-    - name: Build Package
+    - name: Build Python Package
       working-directory: ${{github.workspace}}/build
       shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --target pypkg --config $BUILD_TYPE
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: ldd bindings/python/teensyimu/*.so
       
-    - name: Upload Artifact
+    - name: Upload Python Package Artifact
       uses: actions/upload-artifact@v2
       with:
         path: ${{github.workspace}}/build/bindings/python/*.tar.gz
