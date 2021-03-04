@@ -57,5 +57,6 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: ldd bindings/python/teensyimu/*.so
-      run: ldd screenprint
+      run: |
+        ldd bindings/python/teensyimu/*.so
+        ldd screenprint
