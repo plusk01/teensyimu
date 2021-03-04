@@ -5,7 +5,15 @@ Supporting software to stream IMU (Adafruit ICM-20948) connected to Teensy 4.0 v
 
 ## Installing via `pip`
 
-**Coming Soon**
+For the following systems, the `teensyimu` Python package can be easily installed using `pip` and without requiring building from source: `ubuntu-18.04`, `ubuntu20.04`, `macos-catalina` (potentially `macos-bigsur`), `windows-10`. To do this, we will leverage the pre-built binaries posted on the [releases page](https://github.com/plusk01/teensyimu/releases).
+
+Under the desired release version, expand the **Assets** list. Then, right-click the appropriate `*.tar.gz` link and copy the link address. You can simply direct `pip` to install the package at the URL. For example, using release version 0.1 on macos you would run:
+
+```bash
+$ pip install https://github.com/plusk01/teensyimu/releases/download/0.1/teensyimu-py3-macos-0.1.tar.gz
+```
+
+Once installed, the installation can be verified with `python -m teensyimu.plotimu`. If the device is not plugged in, you should see a message (`Could not find Teensy!`) and the script should quit gracefully. If the device is plugged in data should apppear in the terminal and a plot should open.
 
 ## Building from Source
 
