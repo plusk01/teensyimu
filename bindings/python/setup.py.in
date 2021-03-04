@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='teensyimu',
-    version='0.1',
+    version='${PROJECT_VERSION}',
     author='Parker Lusk',
     author_email='plusk@mit.edu',
     description='Serial driver and tools for Teensy IMU board',

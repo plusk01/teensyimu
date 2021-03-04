@@ -32,3 +32,23 @@ file(WRITE "${PYPKG_DIR}/__init__.py"
     "from .teensyimu import __version__\n"
     "from .teensyimu import __doc__\n\n"
     "from . import tools")
+
+set(DIST "none")
+if(UNIX AND NOT APPLE)
+    execute_process(COMMAND bash -c "lsb_release -cs" OUTPUT_VARIABLE UBUNTU_DIST)
+    string(STRIP "${UBUNTU_DIST}" UBUNTU_DIST)
+    set(DIST "${UBUNTU_DIST}")
+elseif(APPLE)
+    set(DIST "macos")
+elseif(WIN32)
+    set(DIST "win10")
+endif()
+
+set(PKGSTR teensyimu-py3-${DIST}-${PROJECT_VERSION})
+add_custom_target(pypkg
+    DEPENDS py_teensyimu
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PKGSTR}
+    COMMAND ${CMAKE_COMMAND} -E copy setup.py ${PKGSTR}/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PYPKG_DIR} ${PKGSTR}/teensyimu
+    COMMAND ${CMAKE_COMMAND} -E tar zcvf ${PKGSTR}.tar.gz ${PKGSTR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

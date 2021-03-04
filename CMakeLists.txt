@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(teensyimu)
+project(teensyimu VERSION 0.1)
 
 set(CMAKE_CXX_STANDARD 14)
 if(NOT CMAKE_BUILD_TYPE)
@@ -46,10 +46,13 @@ endif()
 ###############################################################################
 
 add_library(teensyimu src/serial_driver.cpp)
-set_target_properties(teensyimu PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(teensyimu PROPERTIES
+  POSITION_INDEPENDENT_CODE ON
+  VERSION ${PROJECT_VERSION})
 target_link_libraries(teensyimu PRIVATE async_comm)
 target_include_directories(teensyimu PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+target_compile_definitions(teensyimu PUBLIC PROJECT_VERSION="${PROJECT_VERSION}")
 
 
 add_executable(screenprint src/screenprint.cpp)

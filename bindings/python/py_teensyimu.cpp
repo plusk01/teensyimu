@@ -18,7 +18,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(teensyimu, m)
 {
   m.doc() = "Serial driver and tools for Teensy IMU board";
-  m.attr("__version__") = "0.1";
+  m.attr("__version__") = PROJECT_VERSION;
 
   py::class_<ti_serial_imu_msg_t>(m, "SerialIMUMsg")
     .def_readwrite("t_us", &ti_serial_imu_msg_t::t_us)
