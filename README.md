@@ -41,6 +41,7 @@ $ mkdir build
 $ cd build
 $ cmake -DBUILD_SHARED_LIBS=OFF ..
 $ cmake --build . --target ALL_BUILD --config Release # or open in VS: start teensyimu.sln
+$ cmake --build . --target pypkg --config Release # to tar python pkg
 ```
 
 Once the package builds successfully, you can install the `teensyimu` Python package as described below.
