@@ -94,3 +94,9 @@ Flash Teensy with `firmware/firmware.ino` sketch.
 ## Examples
 
 See an IMU data plot in real-time with `python -m teensyimu.plotimu`. Alternatively, you can see the frequency spectrum with `python -m teensyimu.plotfreq`
+
+## Coordinate Frame
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wiki/plusk01/teensyimu/assets/teensycoords.png" width="70%" />
+</p>
