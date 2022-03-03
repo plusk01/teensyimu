@@ -3,7 +3,7 @@
 #include "teensyimu_serial.h"
 
 
-#define SPI_FREQ 6000000 // ICM20948 has max 7 MHz SPI, but >6 MHz breaks
+#define SPI_FREQ 4000000 // ICM20948 has max 7 MHz SPI, but >6 MHz breaks
 #define CS_PIN 10        // Which pin you connect chip select (CS) to
 
 ICM_20948_SPI myICM;     // SPI object to talk to ICM20948 IMU
