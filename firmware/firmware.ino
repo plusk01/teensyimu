@@ -165,6 +165,8 @@ void setup()
   myICM.enableDLPF( ICM_20948_Internal_Acc, false );
   myICM.enableDLPF( ICM_20948_Internal_Gyr, false );
 
+  myICM.startupMagnetometer();
+
   //
   // Transmit configuration info
   //
@@ -194,6 +196,9 @@ void loop()
     imu_msg.gyro_x = myICM.gyrX() * DEG2RAD;
     imu_msg.gyro_y = myICM.gyrY() * DEG2RAD;
     imu_msg.gyro_z = myICM.gyrZ() * DEG2RAD;
+    imu_msg.mag_x = myICM.magX();
+    imu_msg.mag_y = myICM.magY();
+    imu_msg.mag_z = myICM.magZ();
    
     const size_t len = ti_serial_imu_msg_send_to_buffer(out_buf, &imu_msg);
     safe_serial_write(out_buf, len);

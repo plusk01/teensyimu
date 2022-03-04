@@ -43,7 +43,14 @@ void callback(const ti_serial_imu_msg_t& msg)
      << std::setw(w) << std::setfill(' ')
      << msg.gyro_y << ", "
      << std::setw(w) << std::setfill(' ')
-     << msg.gyro_z;
+     << msg.gyro_z
+     << '\t'
+     << std::setw(w) << std::setfill(' ')
+     << msg.mag_x << ", "
+     << std::setw(w) << std::setfill(' ')
+     << msg.mag_y << ", "
+     << std::setw(w) << std::setfill(' ')
+     << msg.mag_z;
 
   std::cout << "Got IMU at " << msg.t_us << " us (" << hz << " Hz): "
             << ss.str() << std::endl;

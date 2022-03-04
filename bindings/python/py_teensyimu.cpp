@@ -27,7 +27,10 @@ PYBIND11_MODULE(teensyimu, m)
     .def_readwrite("accel_z", &ti_serial_imu_msg_t::accel_z)
     .def_readwrite("gyro_x", &ti_serial_imu_msg_t::gyro_x)
     .def_readwrite("gyro_y", &ti_serial_imu_msg_t::gyro_y)
-    .def_readwrite("gyro_z", &ti_serial_imu_msg_t::gyro_z);
+    .def_readwrite("gyro_z", &ti_serial_imu_msg_t::gyro_z)
+    .def_readwrite("mag_x", &ti_serial_imu_msg_t::mag_x)
+    .def_readwrite("mag_y", &ti_serial_imu_msg_t::mag_y)
+    .def_readwrite("mag_z", &ti_serial_imu_msg_t::mag_z);
 
   py::class_<ti_serial_rate_msg_t>(m, "SerialRateMsg")
     .def(py::init<uint16_t>(),

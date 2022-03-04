@@ -42,6 +42,9 @@ typedef struct {
   float gyro_x;
   float gyro_y;
   float gyro_z;
+  float mag_x;
+  float mag_y;
+  float mag_z;
 } ti_serial_imu_msg_t;
 
 typedef struct {
@@ -143,7 +146,10 @@ inline void ti_serial_imu_msg_pack(ti_serial_message_t *dst, const ti_serial_imu
   memcpy(dst->payload + offset, &src->accel_z, sizeof(src->accel_z)); offset += sizeof(src->accel_z);
   memcpy(dst->payload + offset, &src->gyro_x,  sizeof(src->gyro_x));  offset += sizeof(src->gyro_x);
   memcpy(dst->payload + offset, &src->gyro_y,  sizeof(src->gyro_y));  offset += sizeof(src->gyro_y);
-  memcpy(dst->payload + offset, &src->gyro_z,  sizeof(src->gyro_z));
+  memcpy(dst->payload + offset, &src->gyro_z,  sizeof(src->gyro_z));  offset += sizeof(src->gyro_z);
+  memcpy(dst->payload + offset, &src->mag_x,  sizeof(src->mag_x));  offset += sizeof(src->mag_x);
+  memcpy(dst->payload + offset, &src->mag_y,  sizeof(src->mag_y));  offset += sizeof(src->mag_y);
+  memcpy(dst->payload + offset, &src->mag_z,  sizeof(src->mag_z));  offset += sizeof(src->mag_z);
   ti_serial_finalize_message(dst);
 }
 
@@ -156,7 +162,10 @@ inline void ti_serial_imu_msg_unpack(ti_serial_imu_msg_t *dst, const ti_serial_m
   memcpy(&dst->accel_z, src->payload + offset, sizeof(dst->accel_z)); offset += sizeof(dst->accel_z);
   memcpy(&dst->gyro_x,  src->payload + offset, sizeof(dst->gyro_x));  offset += sizeof(dst->gyro_x);
   memcpy(&dst->gyro_y,  src->payload + offset, sizeof(dst->gyro_y));  offset += sizeof(dst->gyro_y);
-  memcpy(&dst->gyro_z,  src->payload + offset, sizeof(dst->gyro_z));
+  memcpy(&dst->gyro_z,  src->payload + offset, sizeof(dst->gyro_z));  offset += sizeof(dst->gyro_z);
+  memcpy(&dst->mag_x,  src->payload + offset, sizeof(dst->mag_x));  offset += sizeof(dst->mag_x);
+  memcpy(&dst->mag_y,  src->payload + offset, sizeof(dst->mag_y));  offset += sizeof(dst->mag_y);
+  memcpy(&dst->mag_z,  src->payload + offset, sizeof(dst->mag_z));  offset += sizeof(dst->mag_z);
 }
 
 inline size_t ti_serial_imu_msg_send_to_buffer(uint8_t *dst, const ti_serial_imu_msg_t *src)
