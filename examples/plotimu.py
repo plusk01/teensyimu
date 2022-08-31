@@ -39,6 +39,7 @@ def main():
     port = ti.tools.find_teensy_or_die()
     driver = ti.SerialDriver(port)
     time.sleep(0.1)
+    # could use registerCallbackIMU_NoMag or registerCallbackIMU_3DOF
     driver.registerCallbackIMU(imu_cb)
     driver.sendRate(500)
 

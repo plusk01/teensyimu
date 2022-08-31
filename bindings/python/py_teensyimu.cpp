@@ -32,6 +32,21 @@ PYBIND11_MODULE(teensyimu, m)
     .def_readwrite("mag_y", &ti_serial_imu_msg_t::mag_y)
     .def_readwrite("mag_z", &ti_serial_imu_msg_t::mag_z);
 
+  py::class_<ti_serial_imu_nomag_msg_t>(m, "SerialIMUNoMagMsg")
+    .def_readwrite("t_us", &ti_serial_imu_nomag_msg_t::t_us)
+    .def_readwrite("accel_x", &ti_serial_imu_nomag_msg_t::accel_x)
+    .def_readwrite("accel_y", &ti_serial_imu_nomag_msg_t::accel_y)
+    .def_readwrite("accel_z", &ti_serial_imu_nomag_msg_t::accel_z)
+    .def_readwrite("gyro_x", &ti_serial_imu_nomag_msg_t::gyro_x)
+    .def_readwrite("gyro_y", &ti_serial_imu_nomag_msg_t::gyro_y)
+    .def_readwrite("gyro_z", &ti_serial_imu_nomag_msg_t::gyro_z);
+
+  py::class_<ti_serial_imu_3dof_msg_t>(m, "SerialIMU3DOFMsg")
+    .def_readwrite("t_us", &ti_serial_imu_3dof_msg_t::t_us)
+    .def_readwrite("accel_x", &ti_serial_imu_3dof_msg_t::accel_x)
+    .def_readwrite("accel_y", &ti_serial_imu_3dof_msg_t::accel_y)
+    .def_readwrite("gyro_z", &ti_serial_imu_3dof_msg_t::gyro_z);
+
   py::class_<ti_serial_rate_msg_t>(m, "SerialRateMsg")
     .def(py::init<uint16_t>(),
           py::arg("frequency")=500)
@@ -48,6 +63,8 @@ PYBIND11_MODULE(teensyimu, m)
     .def("sendRate", &acl::teensyimu::SerialDriver::sendRate)
     .def("sendMotorCmd", &acl::teensyimu::SerialDriver::sendMotorCmd)
     .def("registerCallbackIMU", &acl::teensyimu::SerialDriver::registerCallbackIMU)
+    .def("registerCallbackIMU_NoMag", &acl::teensyimu::SerialDriver::registerCallbackIMU_NoMag)
+    .def("registerCallbackIMU_3DOF", &acl::teensyimu::SerialDriver::registerCallbackIMU_3DOF)
     .def("registerCallbackRate", &acl::teensyimu::SerialDriver::registerCallbackRate)
     .def("unregisterCallbacks", &acl::teensyimu::SerialDriver::unregisterCallbacks, py::call_guard<py::gil_scoped_release>());
 }

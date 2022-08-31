@@ -203,6 +203,16 @@ void loop()
     const size_t len = ti_serial_imu_msg_send_to_buffer(out_buf, &imu_msg);
     safe_serial_write(out_buf, len);
 
+    // // could also use a more lightweight version with only 3 fields:
+    // ti_serial_imu_3dof_msg_t imu_msg;
+    // imu_msg.t_us = current_time_us;
+    // imu_msg.accel_x = myICM.accX()*1e-3 * g;
+    // imu_msg.accel_y = myICM.accY()*1e-3 * g;
+    // imu_msg.gyro_z = myICM.gyrZ() * DEG2RAD;
+
+    // const size_t len = ti_serial_imu_3dof_msg_send_to_buffer(out_buf, &imu_msg);
+    // safe_serial_write(out_buf, len);
+
     sensor_poll_previous_us = current_time_us;
   }
 }

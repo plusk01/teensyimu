@@ -25,6 +25,8 @@
 
 typedef enum {
   TI_SERIAL_MSG_IMU,
+  TI_SERIAL_MSG_IMU_NOMAG,
+  TI_SERIAL_MSG_IMU_3DOF,
   TI_SERIAL_MSG_RATE,
   TI_SERIAL_MSG_MOTORCMD,
   TI_SERIAL_NUM_MSGS
@@ -48,6 +50,23 @@ typedef struct {
 } ti_serial_imu_msg_t;
 
 typedef struct {
+  uint32_t t_us;
+  float accel_x;
+  float accel_y;
+  float accel_z;
+  float gyro_x;
+  float gyro_y;
+  float gyro_z;
+} ti_serial_imu_nomag_msg_t;
+
+typedef struct {
+  uint32_t t_us;
+  float accel_x;
+  float accel_y;
+  float gyro_z;
+} ti_serial_imu_3dof_msg_t;
+
+typedef struct {
   uint16_t frequency;
 } ti_serial_rate_msg_t;
 
@@ -58,11 +77,13 @@ typedef struct {
 // payload lengths
 static constexpr float TI_SERIAL_PAYLOAD_LEN[] = {
   sizeof(ti_serial_imu_msg_t),
+  sizeof(ti_serial_imu_nomag_msg_t),
+  sizeof(ti_serial_imu_3dof_msg_t),
   sizeof(ti_serial_rate_msg_t),
   sizeof(ti_serial_motorcmd_msg_t)
 };
 
-// manually indicate the largest msg payload
+// TODO: Manually indicate the largest msg payload
 static constexpr size_t TI_SERIAL_MAX_PAYLOAD_LEN = sizeof(ti_serial_imu_msg_t);
 
 //=============================================================================
@@ -172,6 +193,74 @@ inline size_t ti_serial_imu_msg_send_to_buffer(uint8_t *dst, const ti_serial_imu
 {
   ti_serial_message_t msg;
   ti_serial_imu_msg_pack(&msg, src);
+  return ti_serial_send_to_buffer(dst, &msg);
+}
+
+//=============================================================================
+// IMU No Mag message
+//=============================================================================
+
+inline void ti_serial_imu_nomag_msg_pack(ti_serial_message_t *dst, const ti_serial_imu_nomag_msg_t *src)
+{
+  dst->type = TI_SERIAL_MSG_IMU;
+  size_t offset = 0;
+  memcpy(dst->payload + offset, &src->t_us, sizeof(src->t_us)); offset += sizeof(src->t_us);
+  memcpy(dst->payload + offset, &src->accel_x, sizeof(src->accel_x)); offset += sizeof(src->accel_x);
+  memcpy(dst->payload + offset, &src->accel_y, sizeof(src->accel_y)); offset += sizeof(src->accel_y);
+  memcpy(dst->payload + offset, &src->accel_z, sizeof(src->accel_z)); offset += sizeof(src->accel_z);
+  memcpy(dst->payload + offset, &src->gyro_x,  sizeof(src->gyro_x));  offset += sizeof(src->gyro_x);
+  memcpy(dst->payload + offset, &src->gyro_y,  sizeof(src->gyro_y));  offset += sizeof(src->gyro_y);
+  memcpy(dst->payload + offset, &src->gyro_z,  sizeof(src->gyro_z));  offset += sizeof(src->gyro_z);
+  ti_serial_finalize_message(dst);
+}
+
+inline void ti_serial_imu_nomag_msg_unpack(ti_serial_imu_nomag_msg_t *dst, const ti_serial_message_t *src)
+{
+  size_t offset = 0;
+  memcpy(&dst->t_us, src->payload + offset, sizeof(dst->t_us)); offset += sizeof(dst->t_us);
+  memcpy(&dst->accel_x, src->payload + offset, sizeof(dst->accel_x)); offset += sizeof(dst->accel_x);
+  memcpy(&dst->accel_y, src->payload + offset, sizeof(dst->accel_y)); offset += sizeof(dst->accel_y);
+  memcpy(&dst->accel_z, src->payload + offset, sizeof(dst->accel_z)); offset += sizeof(dst->accel_z);
+  memcpy(&dst->gyro_x,  src->payload + offset, sizeof(dst->gyro_x));  offset += sizeof(dst->gyro_x);
+  memcpy(&dst->gyro_y,  src->payload + offset, sizeof(dst->gyro_y));  offset += sizeof(dst->gyro_y);
+  memcpy(&dst->gyro_z,  src->payload + offset, sizeof(dst->gyro_z));  offset += sizeof(dst->gyro_z);
+}
+
+inline size_t ti_serial_imu_nomag_msg_send_to_buffer(uint8_t *dst, const ti_serial_imu_nomag_msg_t *src)
+{
+  ti_serial_message_t msg;
+  ti_serial_imu_nomag_msg_pack(&msg, src);
+  return ti_serial_send_to_buffer(dst, &msg);
+}
+
+//=============================================================================
+// IMU 3DOF message
+//=============================================================================
+
+inline void ti_serial_imu_3dof_msg_pack(ti_serial_message_t *dst, const ti_serial_imu_3dof_msg_t *src)
+{
+  dst->type = TI_SERIAL_MSG_IMU;
+  size_t offset = 0;
+  memcpy(dst->payload + offset, &src->t_us, sizeof(src->t_us)); offset += sizeof(src->t_us);
+  memcpy(dst->payload + offset, &src->accel_x, sizeof(src->accel_x)); offset += sizeof(src->accel_x);
+  memcpy(dst->payload + offset, &src->accel_y, sizeof(src->accel_y)); offset += sizeof(src->accel_y);
+  memcpy(dst->payload + offset, &src->gyro_z,  sizeof(src->gyro_z));  offset += sizeof(src->gyro_z);
+  ti_serial_finalize_message(dst);
+}
+
+inline void ti_serial_imu_3dof_msg_unpack(ti_serial_imu_3dof_msg_t *dst, const ti_serial_message_t *src)
+{
+  size_t offset = 0;
+  memcpy(&dst->t_us, src->payload + offset, sizeof(dst->t_us)); offset += sizeof(dst->t_us);
+  memcpy(&dst->accel_x, src->payload + offset, sizeof(dst->accel_x)); offset += sizeof(dst->accel_x);
+  memcpy(&dst->accel_y, src->payload + offset, sizeof(dst->accel_y)); offset += sizeof(dst->accel_y);
+  memcpy(&dst->gyro_z,  src->payload + offset, sizeof(dst->gyro_z));  offset += sizeof(dst->gyro_z);
+}
+
+inline size_t ti_serial_imu_3dof_msg_send_to_buffer(uint8_t *dst, const ti_serial_imu_3dof_msg_t *src)
+{
+  ti_serial_message_t msg;
+  ti_serial_imu_3dof_msg_pack(&msg, src);
   return ti_serial_send_to_buffer(dst, &msg);
 }
 

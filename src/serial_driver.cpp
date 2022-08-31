@@ -75,6 +75,22 @@ void SerialDriver::registerCallbackIMU(CallbackIMU cb)
 
 // ----------------------------------------------------------------------------
 
+void SerialDriver::registerCallbackIMU_NoMag(CallbackIMU_NoMag cb)
+{
+  std::lock_guard<std::mutex> lock(mtx_);
+  cb_imu_nomag_ = cb;
+}
+
+// ----------------------------------------------------------------------------
+
+void SerialDriver::registerCallbackIMU_3DOF(CallbackIMU_3DOF cb)
+{
+  std::lock_guard<std::mutex> lock(mtx_);
+  cb_imu_3dof_ = cb;
+}
+
+// ----------------------------------------------------------------------------
+
 void SerialDriver::registerCallbackRate(CallbackRate cb)
 {
   std::lock_guard<std::mutex> lock(mtx_);
@@ -87,6 +103,8 @@ void SerialDriver::unregisterCallbacks()
 {
   std::lock_guard<std::mutex> lock(mtx_);
   cb_imu_ = nullptr;
+  cb_imu_nomag_ = nullptr;
+  cb_imu_3dof_ = nullptr;
   cb_rate_ = nullptr;
 }
 
@@ -104,6 +122,12 @@ void SerialDriver::callback(const uint8_t * data, size_t len)
       switch (msg.type) {
         case TI_SERIAL_MSG_IMU:
           handleIMUMsg(msg);
+          break;
+        case TI_SERIAL_MSG_IMU_NOMAG:
+          handleIMUNoMagMsg(msg);
+          break;
+        case TI_SERIAL_MSG_IMU_3DOF:
+          handleIMU3DOFMsg(msg);
           break;
         case TI_SERIAL_MSG_RATE:
           handleRateMsg(msg);
@@ -123,6 +147,28 @@ void SerialDriver::handleIMUMsg(const ti_serial_message_t& msg)
 
   std::lock_guard<std::mutex> lock(mtx_);
   if (cb_imu_) cb_imu_(imu);
+}
+
+// ----------------------------------------------------------------------------
+
+void SerialDriver::handleIMUNoMagMsg(const ti_serial_message_t& msg)
+{
+  ti_serial_imu_nomag_msg_t imu;
+  ti_serial_imu_nomag_msg_unpack(&imu, &msg);
+
+  std::lock_guard<std::mutex> lock(mtx_);
+  if (cb_imu_nomag_) cb_imu_nomag_(imu);
+}
+
+// ----------------------------------------------------------------------------
+
+void SerialDriver::handleIMU3DOFMsg(const ti_serial_message_t& msg)
+{
+  ti_serial_imu_3dof_msg_t imu;
+  ti_serial_imu_3dof_msg_unpack(&imu, &msg);
+
+  std::lock_guard<std::mutex> lock(mtx_);
+  if (cb_imu_3dof_) cb_imu_3dof_(imu);
 }
 
 // ----------------------------------------------------------------------------
