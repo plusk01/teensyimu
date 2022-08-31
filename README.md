@@ -27,6 +27,8 @@ $ pip install https://github.com/plusk01/teensyimu/releases/download/0.1/teensyi
 
 Once installed, the installation can be verified with `python -m teensyimu.plotimu`. If the device is not plugged in, you should see a message (`Could not find Teensy!`) and the script should quit gracefully. If the device is plugged in data should apppear in the terminal and a plot should open.
 
+***Note**: If the latest version is desired (check [here](https://github.com/plusk01/teensyimu/blob/main/CMakeLists.txt#L2)) and there is not a release matching this version, then this package needs to be built from source (see below, e.g., Linux / MacOS, and then follow "Installing Python Package from Source").*
+
 ### Building from Source
 
 <details>
@@ -81,8 +83,7 @@ Install the built-from-source Python package with `pip`:
 
 ```bash
 cd build
-cd bindings/python
-pip install .
+make pip-install
 ```
 
 </details>
@@ -94,6 +95,12 @@ Flash Teensy with `firmware/firmware.ino` sketch.
 ## Examples
 
 See an IMU data plot in real-time with `python -m teensyimu.plotimu`. Alternatively, you can see the frequency spectrum with `python -m teensyimu.plotfreq`
+
+## Creating New Messages
+
+To create new or change existing messages, changes need to be made in `teensyimu_serial.h` and in `serial_driver.cpp`. For these changes to appear in Python, `py_teensyimu.cpp` also needs to be changed. For an example of necessary changes, see [this commit](https://github.com/plusk01/teensyimu/commit/2f2101865d4a2deb641b958747ef80e209a2884f) where two new messages (*IMU_NoMag* and *IMU_3DOF*) were added.
+
+If messages are changed, this project must be built from source.
 
 ## Coordinate Frame
 
