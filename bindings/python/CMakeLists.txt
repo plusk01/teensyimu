@@ -52,3 +52,9 @@ add_custom_target(pypkg
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PYPKG_DIR} ${PKGSTR}/teensyimu
     COMMAND ${CMAKE_COMMAND} -E tar zcvf ${PKGSTR}.tar.gz ${PKGSTR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+add_custom_target(pip-install
+    DEPENDS pypkg
+    COMMAND ${PYTHON_EXECUTABLE} -m pip install .
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${PKGSTR}
+)
