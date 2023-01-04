@@ -2,7 +2,7 @@
 import time, sys
 import numpy as np
 
-from acl_serial_driver import ACLSerialDriver, ACLSerialRateMsg, ACLSerialMotorCmdMsg
+import teensyimu as ti
 
 At = []
 Ax = []
@@ -39,30 +39,19 @@ def imu_cb(msg):
     u = 0.6 + 0.4 * np.cos(2 * np.pi * 0.5 * t * t)
     U.append(u)
     uu = int(u * 1000)
-    driver.sendMotorCmd(ACLSerialMotorCmdMsg(uu))
-
-
-def find_teensy():
-    import serial.tools.list_ports
-    for port in serial.tools.list_ports.comports():
-        if port.manufacturer and port.manufacturer.lower() == 'teensyduino':
-            return port.device
-    return None
+    driver.sendMotorCmd(uu)
 
 def main():
-    port = find_teensy()
-    if port is None:
-        print("Could not find Teensy!")
-        sys.exit()
+    port = ti.tools.find_teensy_or_die()
 
     global driver
-    driver = ACLSerialDriver(port)
+    driver = ti.SerialDriver(port)
     time.sleep(0.1)
 
-    driver.sendMotorCmd(ACLSerialMotorCmdMsg(500))
+    driver.sendMotorCmd(500)
     time.sleep(1)
 
-    driver.sendRate(ACLSerialRateMsg(1000))
+    driver.sendRate(1000)
     time.sleep(0.001)
 
     driver.registerCallbackIMU(imu_cb)
@@ -76,7 +65,7 @@ def main():
     driver.unregisterCallbacks()
 
     # shut off motor
-    driver.sendMotorCmd(ACLSerialMotorCmdMsg(0))
+    driver.sendMotorCmd(0)
 
     data = np.array([At, Ax, Ay, Az, Gx, Gy, Gz, U]).T
     np.savetxt("datasysid.csv", data, delimiter=',')
