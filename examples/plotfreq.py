@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import time, sys
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtCore, QtGui
+from PyQt6 import QtCore, QtWidgets
 
 import numpy as np
 from scipy import signal
@@ -52,22 +52,32 @@ class IMUAnalyzer:
         sens = "Accelerometer" if self.sensor == 'accel' else "Gyro"
 
         # initialize Qt gui application and window
-        self.default_window_size = (1000, 800)
-        self.app = pg.QtGui.QApplication([])
-        self.pgwin = pg.GraphicsWindow(title="{} Analyzer".format(sens))
-        self.pgwin.resize(*self.default_window_size)
-        self.pgwin.setBackground('k')
+        self.app = QtWidgets.QApplication([])
+        self.window = QtWidgets.QWidget()
+        self.window.setWindowTitle(f"{sens} Analyzer")
+        self.window.resize(1000, 800)
+        # self.window.setBackground('k')
 
-        self.pw = self.pgwin.addPlot(row=0, col=0, title=sens)
-        self.pw2 = self.pgwin.addPlot(row=1, col=0, title="Spectrum")
+
+        # create plots
+        self.pw = pg.PlotWidget(title=sens)
+        self.pw2 = pg.PlotWidget(title="Spectrum")
+
+        # create the layout and add widgets
+        self.layout = QtWidgets.QGridLayout()
+        self.window.setLayout(self.layout)
+        self.layout.addWidget(self.pw, 0, 0)
+        self.layout.addWidget(self.pw2, 1, 0)
+
+        self.window.show()
 
         #
         # Plotting loop
         #
         
-        self.timer = pg.QtCore.QTimer()
+        self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self._timer_cb)
-        self.timer.start(1e3/self.SAMPLE_PLOT_FREQ_HZ) # ms
+        self.timer.start(int(1e3/self.SAMPLE_PLOT_FREQ_HZ)) # ms
 
         #
         # Connect to Teensy
@@ -82,7 +92,7 @@ class IMUAnalyzer:
         self.driver.registerCallbackIMU(self._imu_cb)
 
         # Block on application window
-        QtGui.QApplication.instance().exec_()
+        self.app.exec()
 
         # clean up to prevent error or resource deadlock
         self.driver.unregisterCallbacks()
